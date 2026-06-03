@@ -1,0 +1,162 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:8.0
+    container_name: fe-mis-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: fe-mis
+    networks:
+      - fe-mis-network
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: fe-mis-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - GATEWAY_PORT=3000
+      - FRONTEND_URL=http://localhost:5173
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - EXTINGUISHER_SERVICE_URL=http://extinguisher-service:3002
+      - INSPECTION_SERVICE_URL=http://inspection-service:3003
+      - MAINTENANCE_SERVICE_URL=http://maintenance-service:3004
+      - REPORT_SERVICE_URL=http://report-service:3005
+    depends_on:
+      - auth-service
+      - extinguisher-service
+      - inspection-service
+      - maintenance-service
+      - report-service
+    networks:
+      - fe-mis-network
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: fe-mis-auth-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongodb:27017/fe-mis
+      - JWT_SECRET=your-secret-key-change-in-production
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USER=your-email@gmail.com
+      - MAIL_PASS=your-app-password
+      - FRONTEND_URL=http://localhost:5173
+    depends_on:
+      - mongodb
+    networks:
+      - fe-mis-network
+
+  extinguisher-service:
+    build:
+      context: ./extinguisher-service
+      dockerfile: Dockerfile
+    container_name: fe-mis-extinguisher-service
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - PORT=3002
+      - MONGODB_URI=mongodb://mongodb:27017/fe-mis
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - FRONTEND_URL=http://localhost:5173
+    depends_on:
+      - mongodb
+      - auth-service
+    networks:
+      - fe-mis-network
+
+  inspection-service:
+    build:
+      context: ./inspection-service
+      dockerfile: Dockerfile
+    container_name: fe-mis-inspection-service
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - PORT=3003
+      - MONGODB_URI=mongodb://mongodb:27017/fe-mis
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - EXTINGUISHER_SERVICE_URL=http://extinguisher-service:3002
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USER=your-email@gmail.com
+      - MAIL_PASS=your-app-password
+      - FRONTEND_URL=http://localhost:5173
+    depends_on:
+      - mongodb
+      - auth-service
+      - extinguisher-service
+    networks:
+      - fe-mis-network
+
+  maintenance-service:
+    build:
+      context: ./maintenance-service
+      dockerfile: Dockerfile
+    container_name: fe-mis-maintenance-service
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=development
+      - PORT=3004
+      - MONGODB_URI=mongodb://mongodb:27017/fe-mis
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - EXTINGUISHER_SERVICE_URL=http://extinguisher-service:3002
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USER=your-email@gmail.com
+      - MAIL_PASS=your-app-password
+      - FRONTEND_URL=http://localhost:5173
+    depends_on:
+      - mongodb
+      - auth-service
+      - extinguisher-service
+    networks:
+      - fe-mis-network
+
+  report-service:
+    build:
+      context: ./report-service
+      dockerfile: Dockerfile
+    container_name: fe-mis-report-service
+    ports:
+      - "3005:3005"
+    environment:
+      - NODE_ENV=development
+      - PORT=3005
+      - MONGODB_URI=mongodb://mongodb:27017/fe-mis
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - EXTINGUISHER_SERVICE_URL=http://extinguisher-service:3002
+      - INSPECTION_SERVICE_URL=http://inspection-service:3003
+      - MAINTENANCE_SERVICE_URL=http://maintenance-service:3004
+      - FRONTEND_URL=http://localhost:5173
+    depends_on:
+      - mongodb
+      - auth-service
+      - extinguisher-service
+      - inspection-service
+      - maintenance-service
+    networks:
+      - fe-mis-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  fe-mis-network:
+    driver: bridge

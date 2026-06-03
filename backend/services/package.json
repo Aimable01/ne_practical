@@ -1,0 +1,24 @@
+{
+  "name": "@fe-mis/services",
+  "version": "1.0.0",
+  "description": "Microservices for FE MIS",
+  "private": true,
+  "scripts": {
+    "install:all": "pnpm install && cd shared && pnpm install && cd ../api-gateway && pnpm install && cd ../auth-service && pnpm install && cd ../extinguisher-service && pnpm install && cd ../inspection-service && pnpm install && cd ../maintenance-service && pnpm install && cd ../report-service && pnpm install",
+    "build:shared": "cd shared && pnpm build",
+    "build:all": "pnpm build:shared && cd auth-service && pnpm build && cd ../extinguisher-service && pnpm build && cd ../inspection-service && pnpm build && cd ../maintenance-service && pnpm build && cd ../report-service && pnpm build",
+    "dev:gateway": "cd api-gateway && pnpm dev",
+    "dev:auth": "cd auth-service && pnpm dev",
+    "dev:extinguisher": "cd extinguisher-service && pnpm dev",
+    "dev:inspection": "cd inspection-service && pnpm dev",
+    "dev:maintenance": "cd maintenance-service && pnpm dev",
+    "dev:report": "cd report-service && pnpm dev",
+    "dev:all": "concurrently \"pnpm run dev:gateway\" \"pnpm run dev:auth\" \"pnpm run dev:extinguisher\" \"pnpm run dev:inspection\" \"pnpm run dev:maintenance\" \"pnpm run dev:report\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
