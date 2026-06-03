@@ -42,8 +42,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             }}
             className={isDangerous ? "bg-red-600 hover:bg-red-700" : ""}
           >
-            {isDangerous && <AlertTriangle className="w-4 h-4 mr-2" />}
-            {confirmText}
+            <div className="flex gap-1 items-center">
+              {isDangerous && <AlertTriangle className="w-4 h-4 mr-2" />}
+              {confirmText}
+            </div>
           </Button>
         </div>
       </Card>
