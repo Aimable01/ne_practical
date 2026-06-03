@@ -9,6 +9,7 @@ import { inspectionService } from "../services/inspectionService";
 import { extinguisherService } from "../services/extinguisherService";
 import { authService } from "../services/authService";
 import { inspectionSchema } from "../validations/inspectionSchemas";
+import { getExtinguisherDisplay, getInspectorName, getRecordId } from "../utils/mongoose";
 import type { Inspection, InspectionStatus, User } from "../types";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
@@ -198,19 +199,9 @@ export const InspectionsPage: React.FC = () => {
   };
 
   const filteredInspections = inspections.filter((i) => {
-    const extObj: any = i.extinguisher ?? (i as any).extinguisherId;
-    const serial =
-      typeof extObj === "object" && extObj !== null
-        ? extObj.serialNumber ?? ""
-        : "";
-    const location =
-      typeof extObj === "object" && extObj !== null
-        ? extObj.location ?? ""
-        : "";
-    return (
-      serial.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      location.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const { serial, location } = getExtinguisherDisplay(i);
+    const term = searchTerm.toLowerCase();
+    return serial.toLowerCase().includes(term) || (location ?? "").toLowerCase().includes(term);
   });
 
   const extinguisherOptions = extinguishers.map((e) => ({
@@ -289,36 +280,16 @@ export const InspectionsPage: React.FC = () => {
                 </tr>
               ) : (
                 filteredInspections.map((inspection) => {
-                  const extObj: any =
-                    inspection.extinguisher ?? (inspection as any).extinguisherId;
-                  const inspObj: any =
-                    inspection.inspector ?? (inspection as any).inspectorId;
-                  const rowId: string =
-                    inspection.id ?? (inspection as any)._id ?? Math.random().toString();
-
-                  const extSerial =
-                    typeof extObj === "object" && extObj !== null
-                      ? extObj.serialNumber
-                      : extObj ?? "—";
-                  const extLocation =
-                    typeof extObj === "object" && extObj !== null
-                      ? extObj.location
-                      : null;
-                  const inspName =
-                    typeof inspObj === "object" && inspObj !== null
-                      ? `${inspObj.firstName ?? ""} ${inspObj.lastName ?? ""}`.trim()
-                      : null;
-
-                  // Use _id for delete / edit since id may be undefined on raw Mongoose docs
-                  const editableId =
-                    inspection.id ?? (inspection as any)._id ?? "";
+                  const rowId = getRecordId(inspection);
+                  const { serial, location } = getExtinguisherDisplay(inspection);
+                  const inspName = getInspectorName(inspection);
 
                   return (
                     <tr key={rowId} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="py-3 px-4 text-sm text-text-primary">
-                        <span className="font-mono">{extSerial}</span>
-                        {extLocation && (
-                          <span className="text-text-secondary"> – {extLocation}</span>
+                        <span className="font-mono">{serial}</span>
+                        {location && (
+                          <span className="text-text-secondary"> – {location}</span>
                         )}
                       </td>
                       <td className="py-3 px-4 text-sm text-text-primary">
@@ -328,7 +299,7 @@ export const InspectionsPage: React.FC = () => {
                         {inspection.scheduledTime}
                       </td>
                       <td className="py-3 px-4 text-sm text-text-primary">
-                        {inspName || "—"}
+                        {inspName}
                       </td>
                       <td className="py-3 px-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadge(inspection.status)}`}>
@@ -344,9 +315,7 @@ export const InspectionsPage: React.FC = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() =>
-                                openEditModal({ ...inspection, id: editableId })
-                              }
+                              onClick={() => openEditModal({ ...inspection, id: rowId })}
                               title="Update result / status"
                             >
                               <Pencil className="w-4 h-4" />
@@ -355,7 +324,7 @@ export const InspectionsPage: React.FC = () => {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleDelete(editableId)}
+                                onClick={() => handleDelete(rowId)}
                                 title="Delete"
                               >
                                 <Trash2 className="w-4 h-4 text-red-600" />

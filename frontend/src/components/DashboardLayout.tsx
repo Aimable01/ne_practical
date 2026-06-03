@@ -30,8 +30,8 @@ export const DashboardLayout: React.FC = () => {
 
   // Role-based navigation:
   // ADMIN    → everything
-  // INSPECTOR → Dashboard, Inspections, Maintenance (for conducting inspections, logging results, scheduling maintenance)
-  // USER      → Dashboard, Extinguishers (view-only), Inspections (schedule inspections only)
+  // INSPECTOR → Dashboard, Inspections, Maintenance, Reports, Profile
+  // USER      → Dashboard, Extinguishers (view-only), Inspections, Reports, Profile
   const navItems: NavItem[] = [
     {
       label: "Dashboard",
@@ -42,7 +42,7 @@ export const DashboardLayout: React.FC = () => {
       label: "Extinguishers",
       path: "/extinguishers",
       icon: <FireExtinguisher className="w-5 h-5" />,
-      roles: ["ADMIN", "USER"],
+      roles: ["ADMIN", "INSPECTOR", "USER"],
     },
     {
       label: "Inspections",
@@ -60,7 +60,7 @@ export const DashboardLayout: React.FC = () => {
       label: "Reports",
       path: "/reports",
       icon: <BarChart3 className="w-5 h-5" />,
-      roles: ["ADMIN"],
+      roles: ["ADMIN", "INSPECTOR"],
     },
   ];
 

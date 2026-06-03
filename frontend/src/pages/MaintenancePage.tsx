@@ -7,6 +7,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { maintenanceService } from "../services/maintenanceService";
 import { extinguisherService } from "../services/extinguisherService";
 import { maintenanceSchema } from "../validations/maintenanceSchemas";
+import { getExtinguisherDisplay, getInspectorName, getRecordId } from "../utils/mongoose";
 import type { Maintenance } from "../types";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
@@ -104,19 +105,9 @@ export const MaintenancePage: React.FC = () => {
   };
 
   const filteredRecords = maintenanceRecords.filter((m) => {
-    const extObj: any = m.extinguisher ?? (m as any).extinguisherId;
-    const serial =
-      typeof extObj === "object" && extObj !== null
-        ? extObj.serialNumber ?? ""
-        : "";
-    const location =
-      typeof extObj === "object" && extObj !== null
-        ? extObj.location ?? ""
-        : "";
-    return (
-      serial.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      location.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const { serial, location } = getExtinguisherDisplay(m);
+    const term = searchTerm.toLowerCase();
+    return serial.toLowerCase().includes(term) || (location ?? "").toLowerCase().includes(term);
   });
 
   const extinguisherOptions = extinguishers.map((e) => ({
@@ -183,33 +174,16 @@ export const MaintenancePage: React.FC = () => {
                 </tr>
               ) : (
                 filteredRecords.map((record) => {
-                  // Mongoose may return extinguisherId / inspectorId as a populated object
-                  const extObj: any =
-                    record.extinguisher ?? (record as any).extinguisherId;
-                  const inspObj: any =
-                    record.inspector ?? (record as any).inspectorId;
-                  const recordId: string =
-                    record.id ?? (record as any)._id ?? Math.random().toString();
-
-                  const extSerial =
-                    typeof extObj === "object" && extObj !== null
-                      ? extObj.serialNumber
-                      : extObj ?? "—";
-                  const extLocation =
-                    typeof extObj === "object" && extObj !== null
-                      ? extObj.location
-                      : null;
-                  const inspName =
-                    typeof inspObj === "object" && inspObj !== null
-                      ? `${inspObj.firstName ?? ""} ${inspObj.lastName ?? ""}`.trim()
-                      : null;
+                  const rowId = getRecordId(record);
+                  const { serial, location } = getExtinguisherDisplay(record);
+                  const inspName = getInspectorName(record);
 
                   return (
-                    <tr key={recordId} className="border-b border-gray-100 hover:bg-gray-50">
+                    <tr key={rowId} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="py-3 px-4 text-sm text-text-primary">
-                        <span className="font-mono">{extSerial}</span>
-                        {extLocation && (
-                          <span className="text-text-secondary"> – {extLocation}</span>
+                        <span className="font-mono">{serial}</span>
+                        {location && (
+                          <span className="text-text-secondary"> – {location}</span>
                         )}
                       </td>
                       <td className="py-3 px-4 text-sm text-text-primary max-w-xs">
@@ -222,7 +196,7 @@ export const MaintenancePage: React.FC = () => {
                         <span className="line-clamp-2">{record.conditionsNoted || "—"}</span>
                       </td>
                       <td className="py-3 px-4 text-sm text-text-primary whitespace-nowrap">
-                        {inspName || "—"}
+                        {inspName}
                       </td>
                     </tr>
                   );

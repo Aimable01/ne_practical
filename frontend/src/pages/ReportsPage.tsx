@@ -5,6 +5,7 @@ import { reportService } from "../services/reportService";
 import type { Extinguisher, Inspection, Maintenance } from "../types";
 import { Card, CardHeader } from "../components/ui/Card";
 import { Select } from "../components/ui/Select";
+import { getExtinguisherDisplay, getInspectorName, getRecordId } from "../utils/mongoose";
 
 type Period = "daily" | "monthly" | "yearly";
 type Tab = "extinguishers" | "inspections" | "maintenance" | "expired";
@@ -35,16 +36,10 @@ export const ReportsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   // Raw report data
-  const [extinguisherReports, setExtinguisherReports] = useState<
-    Extinguisher[]
-  >([]);
+  const [extinguisherReports, setExtinguisherReports] = useState<Extinguisher[]>([]);
   const [inspectionReports, setInspectionReports] = useState<Inspection[]>([]);
-  const [maintenanceHistory, setMaintenanceHistory] = useState<Maintenance[]>(
-    [],
-  );
-  const [expiredExtinguishers, setExpiredExtinguishers] = useState<
-    Extinguisher[]
-  >([]);
+  const [maintenanceHistory, setMaintenanceHistory] = useState<Maintenance[]>([]);
+  const [expiredExtinguishers, setExpiredExtinguishers] = useState<Extinguisher[]>([]);
 
   // Summary stats
   const [inspSummary, setInspSummary] = useState<{
@@ -87,9 +82,7 @@ export const ReportsPage: React.FC = () => {
 
       // Extinguisher report — API returns { newExtinguishers, expiredExtinguishers, summary }
       const extData = extRes as any;
-      setExtinguisherReports(
-        extData.newExtinguishers ?? extData.extinguishers ?? [],
-      );
+      setExtinguisherReports(extData.newExtinguishers ?? extData.extinguishers ?? []);
       setExtSummary(extData.summary ?? null);
 
       // Inspection report — API returns { inspections, summary }
@@ -100,10 +93,7 @@ export const ReportsPage: React.FC = () => {
       // Maintenance history — API returns { maintenanceRecords, pagination }
       const maintData = maintRes as any;
       setMaintenanceHistory(
-        maintData.maintenanceRecords ??
-          maintData.maintenance ??
-          maintData.data ??
-          [],
+        maintData.maintenanceRecords ?? maintData.maintenance ?? maintData.data ?? [],
       );
 
       // Expired — API returns { expiredExtinguishers, total }
@@ -144,36 +134,20 @@ export const ReportsPage: React.FC = () => {
       {/* Summary cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-          <p className="text-xs text-text-secondary uppercase tracking-wide">
-            New Extinguishers
-          </p>
-          <p className="text-2xl font-bold text-text-primary mt-1">
-            {extSummary?.totalNew ?? extinguisherReports.length}
-          </p>
+          <p className="text-xs text-text-secondary uppercase tracking-wide">New Extinguishers</p>
+          <p className="text-2xl font-bold text-text-primary mt-1">{extSummary?.totalNew ?? extinguisherReports.length}</p>
         </div>
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-          <p className="text-xs text-text-secondary uppercase tracking-wide">
-            Expired
-          </p>
-          <p className="text-2xl font-bold text-red-600 mt-1">
-            {expiredExtinguishers.length}
-          </p>
+          <p className="text-xs text-text-secondary uppercase tracking-wide">Expired</p>
+          <p className="text-2xl font-bold text-red-600 mt-1">{expiredExtinguishers.length}</p>
         </div>
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-          <p className="text-xs text-text-secondary uppercase tracking-wide">
-            Inspections
-          </p>
-          <p className="text-2xl font-bold text-text-primary mt-1">
-            {inspSummary?.total ?? inspectionReports.length}
-          </p>
+          <p className="text-xs text-text-secondary uppercase tracking-wide">Inspections</p>
+          <p className="text-2xl font-bold text-text-primary mt-1">{inspSummary?.total ?? inspectionReports.length}</p>
         </div>
         <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
-          <p className="text-xs text-text-secondary uppercase tracking-wide">
-            Maintenance Records
-          </p>
-          <p className="text-2xl font-bold text-text-primary mt-1">
-            {maintenanceHistory.length}
-          </p>
+          <p className="text-xs text-text-secondary uppercase tracking-wide">Maintenance Records</p>
+          <p className="text-2xl font-bold text-text-primary mt-1">{maintenanceHistory.length}</p>
         </div>
       </div>
 
@@ -218,60 +192,29 @@ export const ReportsPage: React.FC = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Serial Number
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Location
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Type
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Size
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Status
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Expiry Date
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Added On
-                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Serial Number</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Location</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Type</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Size</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Expiry Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Added On</th>
                   </tr>
                 </thead>
                 <tbody>
                   {extinguisherReports.map((ext) => (
-                    <tr
-                      key={ext.id}
-                      className="border-b border-gray-100 hover:bg-gray-50"
-                    >
-                      <td className="py-3 px-4 text-sm font-mono text-text-primary">
-                        {ext.serialNumber}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-text-primary">
-                        {ext.location}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-text-primary">
-                        {ext.type}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-text-primary">
-                        {ext.size}
-                      </td>
+                    <tr key={ext.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4 text-sm font-mono text-text-primary">{ext.serialNumber}</td>
+                      <td className="py-3 px-4 text-sm text-text-primary">{ext.location}</td>
+                      <td className="py-3 px-4 text-sm text-text-primary">{ext.type}</td>
+                      <td className="py-3 px-4 text-sm text-text-primary">{ext.size}</td>
                       <td className="py-3 px-4">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadgeExt(ext.status)}`}
-                        >
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadgeExt(ext.status)}`}>
                           {ext.status.replace(/_/g, " ")}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-sm text-text-primary">
-                        {ext.expiryDate?.slice(0, 10)}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-text-primary">
-                        {ext.createdAt?.slice(0, 10)}
-                      </td>
+                      <td className="py-3 px-4 text-sm text-text-primary">{ext.expiryDate?.slice(0, 10)}</td>
+                      <td className="py-3 px-4 text-sm text-text-primary">{ext.createdAt?.slice(0, 10)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -291,30 +234,13 @@ export const ReportsPage: React.FC = () => {
           {inspSummary && (
             <div className="grid grid-cols-3 gap-3 mb-4">
               {[
-                {
-                  label: "Completed",
-                  value: inspSummary.completed,
-                  color: "text-green-600",
-                },
-                {
-                  label: "Scheduled",
-                  value: inspSummary.scheduled,
-                  color: "text-blue-600",
-                },
-                {
-                  label: "Failed",
-                  value: inspSummary.failed,
-                  color: "text-red-600",
-                },
+                { label: "Completed", value: inspSummary.completed, color: "text-green-600" },
+                { label: "Scheduled", value: inspSummary.scheduled, color: "text-blue-600" },
+                { label: "Failed", value: inspSummary.failed, color: "text-red-600" },
               ].map((s) => (
-                <div
-                  key={s.label}
-                  className="bg-gray-50 rounded-lg p-3 text-center"
-                >
+                <div key={s.label} className="bg-gray-50 rounded-lg p-3 text-center">
                   <p className="text-xs text-text-secondary">{s.label}</p>
-                  <p className={`text-xl font-bold mt-1 ${s.color}`}>
-                    {s.value}
-                  </p>
+                  <p className={`text-xl font-bold mt-1 ${s.color}`}>{s.value}</p>
                 </div>
               ))}
             </div>
@@ -329,70 +255,36 @@ export const ReportsPage: React.FC = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Extinguisher
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Scheduled Date
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Time
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Status
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Result
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Inspector
-                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Extinguisher</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Scheduled Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Time</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Status</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Result</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Inspector</th>
                   </tr>
                 </thead>
                 <tbody>
                   {inspectionReports.map((insp) => {
-                    const extObj =
-                      insp.extinguisher ?? (insp as any).extinguisherId;
-                    const inspObj = insp.inspector ?? (insp as any).inspectorId;
+                    const rowId = getRecordId(insp);
+                    const { serial, location } = getExtinguisherDisplay(insp);
+                    const inspName = getInspectorName(insp);
                     return (
-                      <tr
-                        key={insp.id}
-                        className="border-b border-gray-100 hover:bg-gray-50"
-                      >
+                      <tr key={rowId} className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="py-3 px-4 text-sm text-text-primary">
-                          <span className="font-mono">
-                            {typeof extObj === "object"
-                              ? extObj?.serialNumber
-                              : extObj}
-                          </span>
-                          {typeof extObj === "object" && extObj?.location && (
-                            <span className="text-text-secondary">
-                              {" "}
-                              – {extObj.location}
-                            </span>
+                          <span className="font-mono">{serial}</span>
+                          {location && (
+                            <span className="text-text-secondary"> – {location}</span>
                           )}
                         </td>
-                        <td className="py-3 px-4 text-sm text-text-primary">
-                          {insp.scheduledDate?.slice(0, 10)}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-text-primary">
-                          {insp.scheduledTime}
-                        </td>
+                        <td className="py-3 px-4 text-sm text-text-primary">{insp.scheduledDate?.slice(0, 10)}</td>
+                        <td className="py-3 px-4 text-sm text-text-primary">{insp.scheduledTime}</td>
                         <td className="py-3 px-4">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadgeInsp(insp.status)}`}
-                          >
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadgeInsp(insp.status)}`}>
                             {insp.status}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-sm text-text-primary">
-                          {insp.result || "—"}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-text-primary">
-                          {typeof inspObj === "object" && inspObj
-                            ? `${inspObj.firstName} ${inspObj.lastName}`
-                            : "—"}
-                        </td>
+                        <td className="py-3 px-4 text-sm text-text-primary">{insp.result || "—"}</td>
+                        <td className="py-3 px-4 text-sm text-text-primary">{inspName}</td>
                       </tr>
                     );
                   })}
@@ -420,64 +312,37 @@ export const ReportsPage: React.FC = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Extinguisher
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Actions Taken
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Date
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Conditions Noted
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Inspector
-                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Extinguisher</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Actions Taken</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Conditions Noted</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Inspector</th>
                   </tr>
                 </thead>
                 <tbody>
                   {maintenanceHistory.map((record) => {
-                    const extObj =
-                      record.extinguisher ?? (record as any).extinguisherId;
-                    const inspObj =
-                      record.inspector ?? (record as any).inspectorId;
+                    const rowId = getRecordId(record);
+                    const { serial, location } = getExtinguisherDisplay(record);
+                    const inspName = getInspectorName(record);
                     return (
-                      <tr
-                        key={record.id}
-                        className="border-b border-gray-100 hover:bg-gray-50"
-                      >
+                      <tr key={rowId} className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="py-3 px-4 text-sm text-text-primary">
-                          <span className="font-mono">
-                            {typeof extObj === "object"
-                              ? extObj?.serialNumber
-                              : extObj}
-                          </span>
-                          {typeof extObj === "object" && extObj?.location && (
-                            <span className="text-text-secondary">
-                              {" "}
-                              – {extObj.location}
-                            </span>
+                          <span className="font-mono">{serial}</span>
+                          {location && (
+                            <span className="text-text-secondary"> – {location}</span>
                           )}
                         </td>
                         <td className="py-3 px-4 text-sm text-text-primary max-w-xs">
-                          <span className="line-clamp-2">
-                            {record.actionsTaken}
-                          </span>
+                          <span className="line-clamp-2">{record.actionsTaken}</span>
                         </td>
                         <td className="py-3 px-4 text-sm text-text-primary whitespace-nowrap">
                           {record.dateOfAction?.slice(0, 10)}
                         </td>
                         <td className="py-3 px-4 text-sm text-text-primary max-w-xs">
-                          <span className="line-clamp-2">
-                            {record.conditionsNoted || "—"}
-                          </span>
+                          <span className="line-clamp-2">{record.conditionsNoted || "—"}</span>
                         </td>
                         <td className="py-3 px-4 text-sm text-text-primary whitespace-nowrap">
-                          {typeof inspObj === "object" && inspObj
-                            ? `${inspObj.firstName} ${inspObj.lastName}`
-                            : "—"}
+                          {inspName}
                         </td>
                       </tr>
                     );
@@ -506,21 +371,11 @@ export const ReportsPage: React.FC = () => {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Serial Number
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Location
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Type
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Expiry Date
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                      Days Overdue
-                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Serial Number</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Location</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Type</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Expiry Date</th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Days Overdue</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -533,22 +388,11 @@ export const ReportsPage: React.FC = () => {
                       ),
                     );
                     return (
-                      <tr
-                        key={ext.id}
-                        className="border-b border-gray-100 hover:bg-red-50"
-                      >
-                        <td className="py-3 px-4 text-sm font-mono text-text-primary">
-                          {ext.serialNumber}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-text-primary">
-                          {ext.location}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-text-primary">
-                          {ext.type}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-red-600 font-medium">
-                          {ext.expiryDate?.slice(0, 10)}
-                        </td>
+                      <tr key={ext.id} className="border-b border-gray-100 hover:bg-red-50">
+                        <td className="py-3 px-4 text-sm font-mono text-text-primary">{ext.serialNumber}</td>
+                        <td className="py-3 px-4 text-sm text-text-primary">{ext.location}</td>
+                        <td className="py-3 px-4 text-sm text-text-primary">{ext.type}</td>
+                        <td className="py-3 px-4 text-sm text-red-600 font-medium">{ext.expiryDate?.slice(0, 10)}</td>
                         <td className="py-3 px-4">
                           <span className="flex items-center gap-1 text-red-600 font-medium text-sm">
                             <AlertTriangle className="w-4 h-4" />

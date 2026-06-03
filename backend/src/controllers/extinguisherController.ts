@@ -1,5 +1,7 @@
 import { Response } from 'express';
 import Extinguisher from '../models/Extinguisher';
+import Inspection from '../models/Inspection';
+import Maintenance from '../models/Maintenance';
 import { logger } from '../utils/logger';
 import { AuthRequest } from '../middleware/auth';
 
@@ -98,10 +100,24 @@ export const deleteExtinguisher = async (req: AuthRequest, res: Response): Promi
       return;
     }
 
-    logger.info(`Extinguisher deleted: ${extinguisher.serialNumber}`);
+    // Cascade delete — remove all inspections and maintenance records for this extinguisher
+    const [deletedInspections, deletedMaintenance] = await Promise.all([
+      Inspection.deleteMany({ extinguisherId: req.params.id }),
+      Maintenance.deleteMany({ extinguisherId: req.params.id }),
+    ]);
+
+    logger.info(
+      `Extinguisher deleted: ${extinguisher.serialNumber} — ` +
+      `${deletedInspections.deletedCount} inspection(s) and ` +
+      `${deletedMaintenance.deletedCount} maintenance record(s) also removed`
+    );
 
     res.json({
-      message: 'Extinguisher deleted successfully'
+      message: 'Extinguisher deleted successfully',
+      cascade: {
+        inspectionsDeleted: deletedInspections.deletedCount,
+        maintenanceDeleted: deletedMaintenance.deletedCount,
+      }
     });
   } catch (error) {
     logger.error('Delete extinguisher error', error);

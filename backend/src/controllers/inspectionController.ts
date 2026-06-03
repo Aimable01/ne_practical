@@ -187,6 +187,7 @@ export const getMyInspections = async (req: AuthRequest, res: Response): Promise
 
     const inspections = await Inspection.find({ inspectorId: req.user?.id })
       .populate('extinguisherId', 'serialNumber location type size status')
+      .populate('inspectorId', 'firstName lastName email')
       .skip(skip)
       .limit(limit)
       .sort({ scheduledDate: 1 });

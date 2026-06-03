@@ -133,6 +133,7 @@ export const getMaintenanceByExtinguisher = async (req: AuthRequest, res: Respon
     const skip = (page - 1) * limit;
 
     const maintenanceRecords = await Maintenance.find({ extinguisherId: req.params.extinguisherId })
+      .populate('extinguisherId', 'serialNumber location type size')
       .populate('inspectorId', 'firstName lastName email')
       .skip(skip)
       .limit(limit)
