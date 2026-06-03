@@ -1,0 +1,266 @@
+openapi: 3.0.0
+info:
+  title: FE MIS API Gateway
+  description: Fire Extinguisher Management System API Gateway
+  version: 1.0.0
+  contact:
+    name: FE MIS Team
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+
+tags:
+  - name: Auth
+    description: Authentication operations
+  - name: Extinguishers
+    description: Extinguisher management
+  - name: Inspections
+    description: Inspection management
+  - name: Maintenance
+    description: Maintenance records
+  - name: Reports
+    description: Reports and analytics
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                role:
+                  type: string
+                  enum: [ADMIN, INSPECTOR, USER]
+                  default: USER
+              required:
+                - firstName
+                - lastName
+                - email
+                - password
+      responses:
+        '201':
+          description: User registered successfully
+        '400':
+          description: Validation error
+        '409':
+          description: Email already exists
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    type: object
+        '401':
+          description: Invalid credentials
+
+  /auth/profile:
+    get:
+      tags:
+        - Auth
+      summary: Get user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved
+        '401':
+          description: Unauthorized
+
+  /extinguishers:
+    get:
+      tags:
+        - Extinguishers
+      summary: Get all extinguishers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of extinguishers
+    post:
+      tags:
+        - Extinguishers
+      summary: Create new extinguisher
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                serialNumber:
+                  type: string
+                location:
+                  type: string
+                type:
+                  type: string
+                  enum: [ABC, DCP, CO2, FOAM, WATER]
+                size:
+                  type: string
+                  enum: [1KG, 2KG, 5KG, 9KG]
+                installationDate:
+                  type: string
+                  format: date
+                expiryDate:
+                  type: string
+                  format: date
+                status:
+                  type: string
+                  enum: [ACTIVE, EXPIRED, DAMAGED, MAINTENANCE]
+      responses:
+        '201':
+          description: Extinguisher created
+        '403':
+          description: Forbidden - Admin only
+
+  /inspections:
+    get:
+      tags:
+        - Inspections
+      summary: Get all inspections
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of inspections
+    post:
+      tags:
+        - Inspections
+      summary: Create new inspection
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                extinguisherId:
+                  type: string
+                scheduledDate:
+                  type: string
+                  format: date
+                scheduledTime:
+                  type: string
+                  format: time
+                inspectorId:
+                  type: string
+                status:
+                  type: string
+                  enum: [SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED]
+      responses:
+        '201':
+          description: Inspection created
+
+  /maintenance:
+    get:
+      tags:
+        - Maintenance
+      summary: Get all maintenance records
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of maintenance records
+    post:
+      tags:
+        - Maintenance
+      summary: Create maintenance record
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                extinguisherId:
+                  type: string
+                inspectorId:
+                  type: string
+                actionsTaken:
+                  type: string
+                dateOfAction:
+                  type: string
+                  format: date
+                conditionsNoted:
+                  type: string
+      responses:
+        '201':
+          description: Maintenance record created
+
+  /reports/dashboard:
+    get:
+      tags:
+        - Reports
+      summary: Get dashboard statistics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard statistics
+
+  /reports/expired:
+    get:
+      tags:
+        - Reports
+      summary: Get expired extinguishers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of expired extinguishers
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

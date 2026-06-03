@@ -28,3 +28,59 @@
 [2026-06-03T20:37:09.702Z] [INFO] Health check available at http://localhost:3001/health
 [2026-06-03T20:37:09.707Z] [INFO] Report Service is running on port 3005
 [2026-06-03T20:37:09.717Z] [INFO] Health check available at http://localhost:3005/health
+[2026-06-03T20:45:22.317Z] [INFO] Auth Service is running on port 3001
+[2026-06-03T20:45:22.318Z] [INFO] Health check available at http://localhost:3001/health
+[2026-06-03T20:45:23.244Z] [INFO] Inspection Service is running on port 3003
+[2026-06-03T20:45:23.248Z] [INFO] Health check available at http://localhost:3003/health
+[2026-06-03T20:45:23.599Z] [INFO] Extinguisher Service is running on port 3002
+[2026-06-03T20:45:23.600Z] [INFO] Health check available at http://localhost:3002/health
+[2026-06-03T20:46:02.164Z] [INFO] Maintenance Service is running on port 3004
+[2026-06-03T20:46:02.166Z] [INFO] Health check available at http://localhost:3004/health
+[2026-06-03T20:46:02.868Z] [INFO] Extinguisher Service is running on port 3002
+[2026-06-03T20:46:02.871Z] [INFO] Health check available at http://localhost:3002/health
+[2026-06-03T20:46:03.474Z] [INFO] Auth Service is running on port 3001
+[2026-06-03T20:46:03.475Z] [INFO] Health check available at http://localhost:3001/health
+[2026-06-03T20:46:03.720Z] [INFO] Report Service is running on port 3005
+[2026-06-03T20:46:03.721Z] [INFO] Health check available at http://localhost:3005/health
+[2026-06-03T20:46:03.821Z] [INFO] Inspection Service is running on port 3003
+[2026-06-03T20:46:03.823Z] [INFO] Health check available at http://localhost:3003/health
+[2026-06-03T20:48:49.043Z] [INFO] Report Service is running on port 3005
+[2026-06-03T20:48:49.044Z] [INFO] Health check available at http://localhost:3005/health
+[2026-06-03T20:48:49.043Z] [INFO] Auth Service is running on port 3001
+[2026-06-03T20:48:49.044Z] [INFO] Health check available at http://localhost:3001/health
+[2026-06-03T20:48:49.069Z] [INFO] Maintenance Service is running on port 3004
+[2026-06-03T20:48:49.071Z] [INFO] Health check available at http://localhost:3004/health
+[2026-06-03T20:48:49.085Z] [INFO] Extinguisher Service is running on port 3002
+[2026-06-03T20:48:49.085Z] [INFO] Health check available at http://localhost:3002/health
+[2026-06-03T20:48:49.114Z] [INFO] Inspection Service is running on port 3003
+[2026-06-03T20:48:49.115Z] [INFO] Health check available at http://localhost:3003/health
+[2026-06-03T20:50:23.641Z] [INFO] Auth Service is running on port 3001
+[2026-06-03T20:50:23.643Z] [INFO] Health check available at http://localhost:3001/health
+[2026-06-03T20:50:23.655Z] [INFO] Report Service is running on port 3005
+[2026-06-03T20:50:23.656Z] [INFO] Health check available at http://localhost:3005/health
+[2026-06-03T20:50:23.683Z] [INFO] Inspection Service is running on port 3003
+[2026-06-03T20:50:23.684Z] [INFO] Health check available at http://localhost:3003/health
+[2026-06-03T20:50:23.686Z] [INFO] Extinguisher Service is running on port 3002
+[2026-06-03T20:50:23.686Z] [INFO] Health check available at http://localhost:3002/health
+[2026-06-03T20:50:23.704Z] [INFO] Maintenance Service is running on port 3004
+[2026-06-03T20:50:23.705Z] [INFO] Health check available at http://localhost:3004/health
+[2026-06-03T20:51:55.743Z] [INFO] Maintenance Service is running on port 3004
+[2026-06-03T20:51:55.744Z] [INFO] Health check available at http://localhost:3004/health
+[2026-06-03T20:51:55.784Z] [INFO] Auth Service is running on port 3001
+[2026-06-03T20:51:55.785Z] [INFO] Health check available at http://localhost:3001/health
+[2026-06-03T20:51:55.798Z] [INFO] Extinguisher Service is running on port 3002
+[2026-06-03T20:51:55.799Z] [INFO] Health check available at http://localhost:3002/health
+[2026-06-03T20:51:55.808Z] [INFO] Report Service is running on port 3005
+[2026-06-03T20:51:55.812Z] [INFO] Health check available at http://localhost:3005/health
+[2026-06-03T20:51:55.835Z] [INFO] Inspection Service is running on port 3003
+[2026-06-03T20:51:55.836Z] [INFO] Health check available at http://localhost:3003/health
+[2026-06-03T20:54:04.961Z] [INFO] Maintenance Service is running on port 3004
+[2026-06-03T20:54:04.963Z] [INFO] Health check available at http://localhost:3004/health
+[2026-06-03T20:54:05.029Z] [INFO] Report Service is running on port 3005
+[2026-06-03T20:54:05.031Z] [INFO] Health check available at http://localhost:3005/health
+[2026-06-03T20:54:05.060Z] [INFO] Auth Service is running on port 3001
+[2026-06-03T20:54:05.061Z] [INFO] Health check available at http://localhost:3001/health
+[2026-06-03T20:54:05.079Z] [INFO] Extinguisher Service is running on port 3002
+[2026-06-03T20:54:05.080Z] [INFO] Health check available at http://localhost:3002/health
+[2026-06-03T20:54:05.085Z] [INFO] Inspection Service is running on port 3003
+[2026-06-03T20:54:05.086Z] [INFO] Health check available at http://localhost:3003/health

@@ -2,7 +2,13 @@ import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { User, UserRole, transporter, logger, AuthRequest } from "@fe-mis/shared";
+import {
+  User,
+  UserRole,
+  transporter,
+  logger,
+  AuthRequest,
+} from "@fe-mis/shared";
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {

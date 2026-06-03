@@ -1,1 +1,27 @@
-{"files":{"services/api-gateway/dist/index.js":{"size":2671,"mtime_nanos":1780517452235284897,"mode":420,"is_dir":false},"services/api-gateway/dist":{"size":0,"mtime_nanos":0,"mode":0,"is_dir":true},"services/api-gateway/.turbo/turbo-build.log":{"size":122,"mtime_nanos":1780517452248937739,"mode":420,"is_dir":false}},"order":["services/api-gateway/.turbo/turbo-build.log","services/api-gateway/dist","services/api-gateway/dist/index.js"]}
+{
+  "files": {
+    "services/api-gateway/dist/index.js": {
+      "size": 2671,
+      "mtime_nanos": 1780517352235284897,
+      "mode": 420,
+      "is_dir": false
+    },
+    "services/api-gateway/dist": {
+      "size": 0,
+      "mtime_nanos": 0,
+      "mode": 0,
+      "is_dir": true
+    },
+    "services/api-gateway/.turbo/turbo-build.log": {
+      "size": 122,
+      "mtime_nanos": 1780517352248937739,
+      "mode": 420,
+      "is_dir": false
+    }
+  },
+  "order": [
+    "services/api-gateway/.turbo/turbo-build.log",
+    "services/api-gateway/dist",
+    "services/api-gateway/dist/index.js"
+  ]
+}
