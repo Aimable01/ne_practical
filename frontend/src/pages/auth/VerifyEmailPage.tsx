@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { authService } from "../../services/authService";
@@ -9,28 +9,36 @@ export const VerifyEmailPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
 
+  const hasVerified = useRef(false);
+
   useEffect(() => {
+    if (hasVerified.current) return;
+
+    hasVerified.current = true;
+
     const verifyEmail = async () => {
       const token = searchParams.get("token");
-      if (token) {
-        try {
-          await authService.verifyEmail(token);
-          setIsVerified(true);
-          toast.success("Email verified successfully");
-        } catch (error: any) {
-          setIsVerified(false);
-          toast.error(
-            error.response?.data?.error || "Email verification failed",
-          );
-        }
-      } else {
+
+      if (!token) {
         setIsVerified(false);
         toast.error("Invalid verification link");
+        return;
+      }
+
+      try {
+        await authService.verifyEmail(token);
+
+        setIsVerified(true);
+        toast.success("Email verified successfully");
+      } catch (error: any) {
+        setIsVerified(false);
+
+        toast.error(error.response?.data?.error || "Email verification failed");
       }
     };
 
     verifyEmail();
-  }, [searchParams]);
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">

@@ -24,6 +24,7 @@ export const ForgotPasswordPage: React.FC = () => {
   });
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
+    console.log("Forgot password form submitted:", data);
     try {
       await authService.forgotPassword(data);
       toast.success(
@@ -31,6 +32,7 @@ export const ForgotPasswordPage: React.FC = () => {
       );
       navigate("/login");
     } catch (error: any) {
+      console.error("Forgot password error:", error);
       toast.error(error.response?.data?.error || "Failed to send reset link");
     }
   };
@@ -50,7 +52,14 @@ export const ForgotPasswordPage: React.FC = () => {
             error={errors.email?.message}
             {...register("email")}
           />
-          <Button type="submit" isLoading={isSubmitting} className="w-full">
+          <Button
+            type="submit"
+            isLoading={isSubmitting}
+            className="w-full"
+            onClick={() => {
+              console.log("Button clicked");
+            }}
+          >
             Send Reset Link
           </Button>
         </form>

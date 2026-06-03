@@ -42,7 +42,9 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     // Send verification email
     try {
-      const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}`;
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      const verificationUrl = `${frontendUrl}/verify-email?token=${emailVerificationToken}`;
+      logger.info(`Verification URL: ${verificationUrl}`);
       await transporter.sendMail({
         from: process.env.MAIL_USER,
         to: email,
@@ -91,6 +93,15 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     if (!isMatch) {
       logger.warn(`Login failed: Invalid password for ${email}`);
       res.status(401).json({ error: "Invalid credentials" });
+      return;
+    }
+
+    // Check if email is verified
+    if (!user.isEmailVerified) {
+      logger.warn(`Login failed: Email not verified for ${email}`);
+      res
+        .status(403)
+        .json({ error: "Please verify your email before logging in" });
       return;
     }
 
@@ -225,7 +236,9 @@ export const resendVerificationEmail = async (
 
     // Send verification email
     try {
-      const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}`;
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      const verificationUrl = `${frontendUrl}/verify-email?token=${emailVerificationToken}`;
+      logger.info(`Verification URL: ${verificationUrl}`);
       await transporter.sendMail({
         from: process.env.MAIL_USER,
         to: user.email,
@@ -344,7 +357,9 @@ export const forgotPassword = async (
 
     // Send reset email
     try {
-      const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetPasswordToken}`;
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      const resetUrl = `${frontendUrl}/reset-password?token=${resetPasswordToken}`;
+      logger.info(`Password reset URL: ${resetUrl}`);
       await transporter.sendMail({
         from: process.env.MAIL_USER,
         to: user.email,
