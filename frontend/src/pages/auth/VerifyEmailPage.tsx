@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { CheckCircle, XCircle } from "lucide-react";
 import { authService } from "../../services/authService";
 import { Button } from "../../components/ui/Button";
 import { Card, CardHeader } from "../../components/ui/Card";
@@ -34,7 +33,7 @@ export const VerifyEmailPage: React.FC = () => {
   }, [searchParams]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <Card className="w-full max-w-md text-center">
         {isVerified === null ? (
           <div className="py-8">
@@ -43,7 +42,6 @@ export const VerifyEmailPage: React.FC = () => {
           </div>
         ) : isVerified ? (
           <div className="py-8">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <CardHeader
               title="Email Verified"
               subtitle="Your email has been successfully verified"
@@ -54,7 +52,6 @@ export const VerifyEmailPage: React.FC = () => {
           </div>
         ) : (
           <div className="py-8">
-            <XCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <CardHeader
               title="Verification Failed"
               subtitle="The verification link is invalid or expired"

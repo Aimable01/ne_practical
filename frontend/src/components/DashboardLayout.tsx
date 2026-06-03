@@ -12,6 +12,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { ConfirmDialog } from "./ui/ConfirmDialog";
 
 interface NavItem {
   label: string;
@@ -25,6 +26,7 @@ export const DashboardLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
   const navItems: NavItem[] = [
     {
@@ -57,6 +59,10 @@ export const DashboardLayout: React.FC = () => {
   ];
 
   const handleLogout = async () => {
+    setIsLogoutDialogOpen(true);
+  };
+
+  const confirmLogout = async () => {
     await logout();
     navigate("/login");
   };
@@ -173,6 +179,16 @@ export const DashboardLayout: React.FC = () => {
           <Outlet />
         </main>
       </div>
+
+      <ConfirmDialog
+        isOpen={isLogoutDialogOpen}
+        onClose={() => setIsLogoutDialogOpen(false)}
+        onConfirm={confirmLogout}
+        title="Confirm Logout"
+        message="Are you sure you want to logout?"
+        confirmText="Logout"
+        isDangerous={false}
+      />
     </div>
   );
 };

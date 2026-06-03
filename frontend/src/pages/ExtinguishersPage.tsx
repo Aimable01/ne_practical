@@ -16,6 +16,7 @@ import { Input } from "../components/ui/Input";
 import { Select } from "../components/ui/Select";
 import { Card, CardHeader } from "../components/ui/Card";
 import { ProtectedRoute } from "../components/ProtectedRoute";
+import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 
 type ExtinguisherFormData = {
   serialNumber: string;
@@ -57,6 +58,8 @@ export const ExtinguishersPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const {
     register,
@@ -116,16 +119,24 @@ export const ExtinguishersPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this extinguisher?")) return;
+    setDeleteId(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteId) return;
 
     try {
-      await extinguisherService.delete(id);
+      await extinguisherService.delete(deleteId);
       toast.success("Extinguisher deleted successfully");
       fetchExtinguishers();
     } catch (error: any) {
       toast.error(
         error.response?.data?.error || "Failed to delete extinguisher",
       );
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setDeleteId(null);
     }
   };
 
@@ -141,7 +152,7 @@ export const ExtinguishersPage: React.FC = () => {
     reset();
   };
 
-  const filteredExtinguishers = extinguishers.filter(
+  const filteredExtinguishers = (extinguishers || []).filter(
     (e) =>
       e.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.location.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -367,6 +378,16 @@ export const ExtinguishersPage: React.FC = () => {
           </Card>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={confirmDelete}
+        title="Confirm Delete"
+        message="Are you sure you want to delete this extinguisher? This action cannot be undone."
+        confirmText="Delete"
+        isDangerous={true}
+      />
     </div>
   );
 };

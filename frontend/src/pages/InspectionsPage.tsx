@@ -14,6 +14,7 @@ import { Select } from "../components/ui/Select";
 import { Textarea } from "../components/ui/Textarea";
 import { Card, CardHeader } from "../components/ui/Card";
 import { ProtectedRoute } from "../components/ProtectedRoute";
+import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 
 type InspectionFormData = {
   extinguisherId: string;
@@ -44,6 +45,8 @@ export const InspectionsPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const {
     register,
@@ -118,14 +121,22 @@ export const InspectionsPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this inspection?")) return;
+    setDeleteId(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteId) return;
 
     try {
-      await inspectionService.delete(id);
+      await inspectionService.delete(deleteId);
       toast.success("Inspection deleted successfully");
       fetchInspections();
     } catch (error: any) {
       toast.error(error.response?.data?.error || "Failed to delete inspection");
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setDeleteId(null);
     }
   };
 
@@ -141,7 +152,7 @@ export const InspectionsPage: React.FC = () => {
     reset();
   };
 
-  const filteredInspections = inspections.filter(
+  const filteredInspections = (inspections || []).filter(
     (i) =>
       i.extinguisher?.serialNumber
         ?.toLowerCase()
@@ -159,7 +170,7 @@ export const InspectionsPage: React.FC = () => {
     );
   }
 
-  const extinguisherOptions = extinguishers.map((e) => ({
+  const extinguisherOptions = (extinguishers || []).map((e) => ({
     value: e.id,
     label: `${e.serialNumber} - ${e.location}`,
   }));
@@ -371,6 +382,16 @@ export const InspectionsPage: React.FC = () => {
           </Card>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={confirmDelete}
+        title="Confirm Delete"
+        message="Are you sure you want to delete this inspection? This action cannot be undone."
+        confirmText="Delete"
+        isDangerous={true}
+      />
     </div>
   );
 };

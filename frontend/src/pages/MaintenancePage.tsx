@@ -25,7 +25,9 @@ type MaintenanceFormData = {
 
 export const MaintenancePage: React.FC = () => {
   const { user, hasRole } = useAuth();
-  const [maintenanceRecords, setMaintenanceRecords] = useState<Maintenance[]>([]);
+  const [maintenanceRecords, setMaintenanceRecords] = useState<Maintenance[]>(
+    [],
+  );
   const [extinguishers, setExtinguishers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,7 +51,7 @@ export const MaintenancePage: React.FC = () => {
 
   const fetchMaintenanceRecords = async () => {
     try {
-      const response = hasRole(['INSPECTOR'])
+      const response = hasRole(["INSPECTOR"])
         ? await maintenanceService.getMyMaintenance(currentPage, 10)
         : await maintenanceService.getAll(currentPage, 10);
       setMaintenanceRecords(response.data);
@@ -95,9 +97,14 @@ export const MaintenancePage: React.FC = () => {
     reset();
   };
 
-  const filteredRecords = maintenanceRecords.filter(m =>
-    m.extinguisher?.serialNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    m.extinguisher?.location?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredRecords = (maintenanceRecords || []).filter(
+    (m) =>
+      m.extinguisher?.serialNumber
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      m.extinguisher?.location
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()),
   );
 
   if (isLoading) {
@@ -108,7 +115,7 @@ export const MaintenancePage: React.FC = () => {
     );
   }
 
-  const extinguisherOptions = extinguishers.map(e => ({
+  const extinguisherOptions = (extinguishers || []).map((e) => ({
     value: e.id,
     label: `${e.serialNumber} - ${e.location}`,
   }));
@@ -116,7 +123,9 @@ export const MaintenancePage: React.FC = () => {
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-text-primary">Maintenance Logs</h1>
+        <h1 className="text-2xl font-bold text-text-primary">
+          Maintenance Logs
+        </h1>
         <div className="flex items-center space-x-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-placeholder w-4 h-4" />
@@ -141,23 +150,39 @@ export const MaintenancePage: React.FC = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Extinguisher</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Actions Taken</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Date</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Conditions</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Inspector</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
+                  Extinguisher
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
+                  Actions Taken
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
+                  Date
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
+                  Conditions
+                </th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
+                  Inspector
+                </th>
               </tr>
             </thead>
             <tbody>
               {filteredRecords.map((record) => (
-                <tr key={record.id} className="border-b border-gray-100 hover:bg-gray-50">
+                <tr
+                  key={record.id}
+                  className="border-b border-gray-100 hover:bg-gray-50"
+                >
                   <td className="py-3 px-4 text-sm text-text-primary">
-                    {record.extinguisher?.serialNumber} - {record.extinguisher?.location}
+                    {record.extinguisher?.serialNumber} -{" "}
+                    {record.extinguisher?.location}
                   </td>
                   <td className="py-3 px-4 text-sm text-text-primary max-w-xs truncate">
                     {record.actionsTaken}
                   </td>
-                  <td className="py-3 px-4 text-sm text-text-primary">{record.dateOfAction}</td>
+                  <td className="py-3 px-4 text-sm text-text-primary">
+                    {record.dateOfAction}
+                  </td>
                   <td className="py-3 px-4 text-sm text-text-primary max-w-xs truncate">
                     {record.conditionsNoted || "-"}
                   </td>
@@ -179,7 +204,7 @@ export const MaintenancePage: React.FC = () => {
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
               >
                 Previous
@@ -187,7 +212,9 @@ export const MaintenancePage: React.FC = () => {
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={currentPage === totalPages}
               >
                 Next
@@ -200,7 +227,7 @@ export const MaintenancePage: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <CardHeader 
+            <CardHeader
               title="Log Maintenance"
               subtitle="Record maintenance activity for an extinguisher"
             />
