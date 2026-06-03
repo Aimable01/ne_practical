@@ -5,18 +5,25 @@ A comprehensive Node.js/Express backend API for managing fire extinguishers, ins
 ## Features
 
 ### User Management
+
 - User registration with role assignment (ADMIN, INSPECTOR, USER)
+- Email verification for new user registration
 - JWT-based authentication
 - Role-based authorization
 - Secure password hashing with bcrypt
+- Profile management (update profile)
+- Password change functionality
+- Password recovery (forgot/reset password)
 
 ### Fire Extinguisher Management
+
 - CRUD operations for fire extinguishers
 - Track serial number, location, type, size, installation date, expiry date, and status
 - Pagination support for listing all extinguishers
 - Role-based access control (ADMIN/INSPECTOR can create/update, ADMIN can delete)
 
 ### Inspection Scheduling
+
 - Schedule inspections for specific extinguishers
 - Assign inspectors to inspections
 - Email notifications to inspectors using Nodemailer
@@ -24,11 +31,13 @@ A comprehensive Node.js/Express backend API for managing fire extinguishers, ins
 - View assigned inspections
 
 ### Maintenance Logging
+
 - Log maintenance activities with actions taken, date, and conditions
 - Track maintenance history per extinguisher
 - View personal maintenance logs
 
 ### Reporting Services
+
 - Real-time dashboard statistics
 - Daily, monthly, and yearly reports
 - Extinguisher status reports
@@ -37,6 +46,7 @@ A comprehensive Node.js/Express backend API for managing fire extinguishers, ins
 - Expired extinguishers tracking
 
 ### Security
+
 - Helmet for security headers
 - CORS configuration
 - Rate limiting (100 requests per 15 minutes)
@@ -46,6 +56,7 @@ A comprehensive Node.js/Express backend API for managing fire extinguishers, ins
 - Comprehensive error handling
 
 ### Documentation
+
 - Swagger/OpenAPI documentation at `/api-docs`
 - Comprehensive API documentation with examples
 
@@ -113,21 +124,24 @@ backend/
 ## Installation
 
 1. **Install dependencies** (using pnpm as specified in package.json):
+
 ```bash
 pnpm install
 ```
 
 2. **Configure environment variables**:
    Copy `.env.example` to `.env` and update with your configuration:
+
 ```bash
 cp .env.example .env
 ```
 
-   Update the following variables in `.env`:
-   - `MONGODB_URI`: Your MongoDB connection string
-   - `JWT_SECRET`: A secure secret key for JWT tokens
-   - `MAIL_HOST`, `MAIL_PORT`, `MAIL_USER`, `MAIL_PASS`: Your email configuration
-   - `FRONTEND_URL`: Your frontend URL for CORS
+Update the following variables in `.env`:
+
+- `MONGODB_URI`: Your MongoDB connection string
+- `JWT_SECRET`: A secure secret key for JWT tokens
+- `MAIL_HOST`, `MAIL_PORT`, `MAIL_USER`, `MAIL_PASS`: Your email configuration
+- `FRONTEND_URL`: Your frontend URL for CORS
 
 3. **Ensure MongoDB is running**:
    Make sure your MongoDB server is running and accessible at the specified URI.
@@ -135,12 +149,15 @@ cp .env.example .env
 ## Running the Application
 
 ### Development Mode
+
 ```bash
 pnpm run dev
 ```
+
 This will start the server with nodemon for auto-reloading on changes.
 
 ### Production Mode
+
 ```bash
 pnpm run build
 pnpm start
@@ -151,17 +168,26 @@ The server will start on port 3000 (or the port specified in `.env`).
 ## API Endpoints
 
 ### Base URL
+
 - Development: `http://localhost:3000`
 - API Documentation: `http://localhost:3000/api-docs`
 - Health Check: `http://localhost:3000/health`
 
 ### Authentication Endpoints
-- `POST /api/auth/register` - Register a new user
+
+- `POST /api/auth/register` - Register a new user (sends verification email)
 - `POST /api/auth/login` - Login user
 - `POST /api/auth/logout` - Logout user
 - `GET /api/auth/profile` - Get user profile
+- `GET /api/auth/verify-email?token=xxx` - Verify email address
+- `POST /api/auth/resend-verification` - Resend verification email
+- `PUT /api/auth/profile` - Update user profile
+- `POST /api/auth/change-password` - Change password
+- `POST /api/auth/forgot-password` - Request password reset
+- `POST /api/auth/reset-password` - Reset password with token
 
 ### Extinguisher Endpoints
+
 - `GET /api/extinguishers` - Get all extinguishers (paginated)
 - `GET /api/extinguishers/:id` - Get extinguisher by ID
 - `POST /api/extinguishers` - Create new extinguisher (ADMIN/INSPECTOR)
@@ -169,6 +195,7 @@ The server will start on port 3000 (or the port specified in `.env`).
 - `DELETE /api/extinguishers/:id` - Delete extinguisher (ADMIN)
 
 ### Inspection Endpoints
+
 - `GET /api/inspections` - Get all inspections (paginated)
 - `GET /api/inspections/my` - Get my assigned inspections
 - `GET /api/inspections/:id` - Get inspection by ID
@@ -177,6 +204,7 @@ The server will start on port 3000 (or the port specified in `.env`).
 - `DELETE /api/inspections/:id` - Delete inspection (ADMIN)
 
 ### Maintenance Endpoints
+
 - `GET /api/maintenance` - Get all maintenance records (paginated)
 - `GET /api/maintenance/my` - Get my maintenance logs
 - `GET /api/maintenance/extinguisher/:extinguisherId` - Get maintenance by extinguisher
@@ -184,6 +212,7 @@ The server will start on port 3000 (or the port specified in `.env`).
 - `POST /api/maintenance` - Log maintenance activity (ADMIN/INSPECTOR)
 
 ### Reporting Endpoints
+
 - `GET /api/reports/dashboard` - Get dashboard statistics
 - `GET /api/reports/extinguishers?period=daily|monthly|yearly` - Get extinguisher reports
 - `GET /api/reports/inspections?period=daily|monthly|yearly` - Get inspection reports
@@ -193,18 +222,21 @@ The server will start on port 3000 (or the port specified in `.env`).
 ## User Roles
 
 ### ADMIN
+
 - Full access to all features
 - Can create, update, and delete extinguishers
 - Can manage inspections and maintenance
 - Can access all reports
 
 ### INSPECTOR
+
 - Can create and update extinguishers
 - Can schedule and complete inspections
 - Can log maintenance activities
 - Can view assigned inspections and personal maintenance logs
 
 ### USER
+
 - Can view extinguisher status
 - Can schedule inspections
 - Can view inspection status
@@ -224,6 +256,7 @@ The server will start on port 3000 (or the port specified in `.env`).
 ## Logging
 
 Logs are saved to the `logs/app.log` file with the following levels:
+
 - INFO: General information
 - WARN: Warning messages
 - ERROR: Error messages
@@ -231,17 +264,17 @@ Logs are saved to the `logs/app.log` file with the following levels:
 
 ## Environment Variables
 
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| PORT | Server port | No | 3000 |
-| NODE_ENV | Environment | No | development |
-| MONGODB_URI | MongoDB connection string | Yes | - |
-| JWT_SECRET | JWT secret key | Yes | - |
-| MAIL_HOST | SMTP host | Yes | - |
-| MAIL_PORT | SMTP port | Yes | - |
-| MAIL_USER | SMTP username | Yes | - |
-| MAIL_PASS | SMTP password | Yes | - |
-| FRONTEND_URL | Frontend URL for CORS | No | http://localhost:5173 |
+| Variable     | Description               | Required | Default               |
+| ------------ | ------------------------- | -------- | --------------------- |
+| PORT         | Server port               | No       | 3000                  |
+| NODE_ENV     | Environment               | No       | development           |
+| MONGODB_URI  | MongoDB connection string | Yes      | -                     |
+| JWT_SECRET   | JWT secret key            | Yes      | -                     |
+| MAIL_HOST    | SMTP host                 | Yes      | -                     |
+| MAIL_PORT    | SMTP port                 | Yes      | -                     |
+| MAIL_USER    | SMTP username             | Yes      | -                     |
+| MAIL_PASS    | SMTP password             | Yes      | -                     |
+| FRONTEND_URL | Frontend URL for CORS     | No       | http://localhost:5173 |
 
 ## Testing the API
 
