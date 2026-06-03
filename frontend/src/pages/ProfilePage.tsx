@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { User, Lock, Mail } from "lucide-react";
+import { User, Lock } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { authService } from "../services/authService";
 import {
