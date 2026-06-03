@@ -182,8 +182,10 @@ export const ExtinguishersPage: React.FC = () => {
           </div>
           <ProtectedRoute allowedRoles={["ADMIN", "INSPECTOR"]}>
             <Button onClick={openModal}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Extinguisher
+              <div className="flex gap-1 items-center">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Extinguisher
+              </div>
             </Button>
           </ProtectedRoute>
         </div>

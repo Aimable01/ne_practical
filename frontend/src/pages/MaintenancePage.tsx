@@ -138,8 +138,10 @@ export const MaintenancePage: React.FC = () => {
           </div>
           <ProtectedRoute allowedRoles={["ADMIN", "INSPECTOR"]}>
             <Button onClick={openModal}>
-              <Plus className="w-4 h-4 mr-2" />
-              Log Maintenance
+              <div className="flex gap-1 items-center">
+                <Plus className="w-4 h-4 mr-2" />
+                Log Maintenance
+              </div>
             </Button>
           </ProtectedRoute>
         </div>

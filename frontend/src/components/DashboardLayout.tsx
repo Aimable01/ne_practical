@@ -91,9 +91,7 @@ export const DashboardLayout: React.FC = () => {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h1 className="text-xl font-bold text-brand-primary">
-              Fire Safety
-            </h1>
+            <h1 className="text-xl font-bold text-brand-primary">FE MIS</h1>
             <button
               onClick={() => setIsSidebarOpen(false)}
               className="lg:hidden text-gray-500 hover:text-gray-700"

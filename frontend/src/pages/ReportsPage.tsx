@@ -81,8 +81,11 @@ export const ReportsPage: React.FC = () => {
             className="w-40"
           />
           <Button onClick={handleExport}>
-            <Download className="w-4 h-4 mr-2" />
-            Export
+            <div className="flex gap-1 items-center">
+              {" "}
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </div>
           </Button>
         </div>
       </div>

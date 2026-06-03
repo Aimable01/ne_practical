@@ -191,8 +191,10 @@ export const InspectionsPage: React.FC = () => {
           </div>
           <ProtectedRoute allowedRoles={["ADMIN", "USER"]}>
             <Button onClick={openModal}>
-              <Plus className="w-4 h-4 mr-2" />
-              Schedule Inspection
+              <div className="flex gap-1 items-center">
+                <Plus className="w-4 h-4 mr-2" />
+                Schedule Inspection
+              </div>
             </Button>
           </ProtectedRoute>
         </div>
