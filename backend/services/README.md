@@ -38,7 +38,36 @@ services/
 
 ## Running the Services
 
-### Option 1: Using Docker Compose (Recommended)
+### Quick Start (Local Development)
+
+**Single command to run all services:**
+```bash
+cd /Users/aimable/Documents/NE\ PRACTICALS/ne_practical/backend/services
+./start-all.sh
+```
+
+Or manually:
+```bash
+cd /Users/aimable/Documents/NE\ PRACTICALS/ne_practical/backend/services
+pnpm run dev:all
+```
+
+### Prerequisites
+
+1. **Start MongoDB:**
+   ```bash
+   mongod --dbpath ./data
+   ```
+
+2. **Configure environment variables:**
+   
+   Copy `.env.example` files from each service directory to `.env` and configure:
+   - MongoDB URI
+   - JWT secret
+   - Mail configuration
+   - Service URLs
+
+### Option 1: Using Docker Compose (Recommended for Production)
 
 1. **Start MongoDB:**
    ```bash
@@ -58,70 +87,6 @@ services/
 4. **Stop all services:**
    ```bash
    docker-compose down
-   ```
-
-### Option 2: Local Development
-
-1. **Install dependencies:**
-   ```bash
-   cd services
-   pnpm run install:all
-   ```
-
-2. **Build shared package:**
-   ```bash
-   pnpm run build:shared
-   ```
-
-3. **Configure environment variables:**
-   
-   Copy `.env.example` files from each service directory and configure:
-   - MongoDB URI
-   - JWT secret
-   - Mail configuration
-   - Service URLs
-
-4. **Start MongoDB:**
-   ```bash
-   mongod --dbpath ./data
-   ```
-
-5. **Start all services (in separate terminals):**
-   ```bash
-   # Terminal 1 - API Gateway
-   cd api-gateway
-   cp .env.example .env
-   pnpm dev
-
-   # Terminal 2 - Auth Service
-   cd auth-service
-   cp .env.example .env
-   pnpm dev
-
-   # Terminal 3 - Extinguisher Service
-   cd extinguisher-service
-   cp .env.example .env
-   pnpm dev
-
-   # Terminal 4 - Inspection Service
-   cd inspection-service
-   cp .env.example .env
-   pnpm dev
-
-   # Terminal 5 - Maintenance Service
-   cd maintenance-service
-   cp .env.example .env
-   pnpm dev
-
-   # Terminal 6 - Report Service
-   cd report-service
-   cp .env.example .env
-   pnpm dev
-   ```
-
-   Or use the convenience script:
-   ```bash
-   pnpm run dev:all
    ```
 
 ## Service Endpoints
