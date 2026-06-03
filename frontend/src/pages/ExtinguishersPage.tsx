@@ -236,8 +236,11 @@ export const ExtinguishersPage: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredExtinguishers.map((extinguisher) => (
-                  <tr key={extinguisher.id} className="border-b border-gray-100 hover:bg-gray-50">
+                filteredExtinguishers.map((extinguisher) => {
+                  const rowId = extinguisher.id ?? (extinguisher as any)._id ?? extinguisher.serialNumber;
+                  const editId = extinguisher.id ?? (extinguisher as any)._id ?? "";
+                  return (
+                  <tr key={rowId} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-3 px-4 text-sm font-mono text-text-primary">{extinguisher.serialNumber}</td>
                     <td className="py-3 px-4 text-sm text-text-primary">{extinguisher.location}</td>
                     <td className="py-3 px-4 text-sm text-text-primary">{extinguisher.type}</td>
@@ -265,7 +268,7 @@ export const ExtinguishersPage: React.FC = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDelete(extinguisher.id)}
+                              onClick={() => handleDelete(editId)}
                               title="Delete"
                             >
                               <Trash2 className="w-4 h-4 text-red-600" />
@@ -275,7 +278,8 @@ export const ExtinguishersPage: React.FC = () => {
                       </td>
                     )}
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>

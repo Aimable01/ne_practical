@@ -56,7 +56,7 @@ export const MaintenancePage: React.FC = () => {
       const response = isInspector
         ? await maintenanceService.getMyMaintenance(currentPage, 10)
         : await maintenanceService.getAll(currentPage, 10);
-      setMaintenanceRecords(response.maintenanceRecords || response.maintenance || response.data || []);
+      setMaintenanceRecords(response.maintenanceRecords ?? []);
       const p = response.pagination;
       setTotalPages(p.pages ?? p.totalPages ?? 1);
       setTotalItems(p.total ?? 0);
@@ -103,15 +103,21 @@ export const MaintenancePage: React.FC = () => {
     reset();
   };
 
-  const filteredRecords = maintenanceRecords.filter(
-    (m) =>
-      (m.extinguisher?.serialNumber ?? "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      (m.extinguisher?.location ?? "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()),
-  );
+  const filteredRecords = maintenanceRecords.filter((m) => {
+    const extObj: any = m.extinguisher ?? (m as any).extinguisherId;
+    const serial =
+      typeof extObj === "object" && extObj !== null
+        ? extObj.serialNumber ?? ""
+        : "";
+    const location =
+      typeof extObj === "object" && extObj !== null
+        ? extObj.location ?? ""
+        : "";
+    return (
+      serial.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      location.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   const extinguisherOptions = extinguishers.map((e) => ({
     value: e.id ?? e._id,
@@ -176,30 +182,51 @@ export const MaintenancePage: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredRecords.map((record) => (
-                  <tr key={record.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 text-sm text-text-primary">
-                      <span className="font-mono">{record.extinguisher?.serialNumber ?? record.extinguisherId}</span>
-                      {record.extinguisher?.location && (
-                        <span className="text-text-secondary"> – {record.extinguisher.location}</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-text-primary max-w-xs">
-                      <span className="line-clamp-2">{record.actionsTaken}</span>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-text-primary whitespace-nowrap">
-                      {record.dateOfAction?.slice(0, 10)}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-text-primary max-w-xs">
-                      <span className="line-clamp-2">{record.conditionsNoted || "—"}</span>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-text-primary whitespace-nowrap">
-                      {record.inspector
-                        ? `${record.inspector.firstName} ${record.inspector.lastName}`
-                        : "—"}
-                    </td>
-                  </tr>
-                ))
+                filteredRecords.map((record) => {
+                  // Mongoose may return extinguisherId / inspectorId as a populated object
+                  const extObj: any =
+                    record.extinguisher ?? (record as any).extinguisherId;
+                  const inspObj: any =
+                    record.inspector ?? (record as any).inspectorId;
+                  const recordId: string =
+                    record.id ?? (record as any)._id ?? Math.random().toString();
+
+                  const extSerial =
+                    typeof extObj === "object" && extObj !== null
+                      ? extObj.serialNumber
+                      : extObj ?? "—";
+                  const extLocation =
+                    typeof extObj === "object" && extObj !== null
+                      ? extObj.location
+                      : null;
+                  const inspName =
+                    typeof inspObj === "object" && inspObj !== null
+                      ? `${inspObj.firstName ?? ""} ${inspObj.lastName ?? ""}`.trim()
+                      : null;
+
+                  return (
+                    <tr key={recordId} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4 text-sm text-text-primary">
+                        <span className="font-mono">{extSerial}</span>
+                        {extLocation && (
+                          <span className="text-text-secondary"> – {extLocation}</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-text-primary max-w-xs">
+                        <span className="line-clamp-2">{record.actionsTaken}</span>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-text-primary whitespace-nowrap">
+                        {record.dateOfAction?.slice(0, 10)}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-text-primary max-w-xs">
+                        <span className="line-clamp-2">{record.conditionsNoted || "—"}</span>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-text-primary whitespace-nowrap">
+                        {inspName || "—"}
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

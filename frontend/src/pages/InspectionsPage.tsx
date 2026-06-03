@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
@@ -16,15 +17,8 @@ import { Textarea } from "../components/ui/Textarea";
 import { Card, CardHeader } from "../components/ui/Card";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 
-type InspectionFormData = {
-  extinguisherId: string;
-  scheduledDate: string;
-  scheduledTime: string;
-  inspectorId: string;
-  status: InspectionStatus;
-  result?: string;
-  notes?: string;
-};
+// Derive the form type directly from the Zod schema so it always stays in sync
+type InspectionFormData = z.infer<typeof inspectionSchema>;
 
 // For editing an existing inspection (INSPECTOR / ADMIN only)
 type UpdateFormData = {
@@ -51,7 +45,7 @@ const statusBadge = (status: InspectionStatus) => {
 };
 
 export const InspectionsPage: React.FC = () => {
-  const { user, hasRole } = useAuth();
+  const { user } = useAuth();
   const isAdmin = user?.role === "ADMIN";
   const isInspector = user?.role === "INSPECTOR";
   const isAdminOrInspector = isAdmin || isInspector;
@@ -75,7 +69,6 @@ export const InspectionsPage: React.FC = () => {
     register: regCreate,
     handleSubmit: handleCreate,
     reset: resetCreate,
-    setValue: setCreateValue,
     formState: { errors: createErrors, isSubmitting: isCreating },
   } = useForm<InspectionFormData>({
     resolver: zodResolver(inspectionSchema),
@@ -204,15 +197,21 @@ export const InspectionsPage: React.FC = () => {
     }
   };
 
-  const filteredInspections = inspections.filter(
-    (i) =>
-      (i.extinguisher?.serialNumber ?? "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      (i.extinguisher?.location ?? "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()),
-  );
+  const filteredInspections = inspections.filter((i) => {
+    const extObj: any = i.extinguisher ?? (i as any).extinguisherId;
+    const serial =
+      typeof extObj === "object" && extObj !== null
+        ? extObj.serialNumber ?? ""
+        : "";
+    const location =
+      typeof extObj === "object" && extObj !== null
+        ? extObj.location ?? ""
+        : "";
+    return (
+      serial.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      location.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
 
   const extinguisherOptions = extinguishers.map((e) => ({
     value: e.id ?? e._id,
@@ -289,59 +288,85 @@ export const InspectionsPage: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredInspections.map((inspection) => (
-                  <tr key={inspection.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 text-sm text-text-primary">
-                      <span className="font-mono">{inspection.extinguisher?.serialNumber ?? inspection.extinguisherId}</span>
-                      {inspection.extinguisher?.location && (
-                        <span className="text-text-secondary"> – {inspection.extinguisher.location}</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-text-primary">
-                      {inspection.scheduledDate?.slice(0, 10)}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-text-primary">
-                      {inspection.scheduledTime}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-text-primary">
-                      {inspection.inspector
-                        ? `${inspection.inspector.firstName} ${inspection.inspector.lastName}`
-                        : "—"}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadge(inspection.status)}`}>
-                        {inspection.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-text-primary">
-                      {inspection.result || "—"}
-                    </td>
-                    {isAdminOrInspector && (
+                filteredInspections.map((inspection) => {
+                  const extObj: any =
+                    inspection.extinguisher ?? (inspection as any).extinguisherId;
+                  const inspObj: any =
+                    inspection.inspector ?? (inspection as any).inspectorId;
+                  const rowId: string =
+                    inspection.id ?? (inspection as any)._id ?? Math.random().toString();
+
+                  const extSerial =
+                    typeof extObj === "object" && extObj !== null
+                      ? extObj.serialNumber
+                      : extObj ?? "—";
+                  const extLocation =
+                    typeof extObj === "object" && extObj !== null
+                      ? extObj.location
+                      : null;
+                  const inspName =
+                    typeof inspObj === "object" && inspObj !== null
+                      ? `${inspObj.firstName ?? ""} ${inspObj.lastName ?? ""}`.trim()
+                      : null;
+
+                  // Use _id for delete / edit since id may be undefined on raw Mongoose docs
+                  const editableId =
+                    inspection.id ?? (inspection as any)._id ?? "";
+
+                  return (
+                    <tr key={rowId} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-3 px-4 text-sm text-text-primary">
+                        <span className="font-mono">{extSerial}</span>
+                        {extLocation && (
+                          <span className="text-text-secondary"> – {extLocation}</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-text-primary">
+                        {inspection.scheduledDate?.slice(0, 10)}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-text-primary">
+                        {inspection.scheduledTime}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-text-primary">
+                        {inspName || "—"}
+                      </td>
                       <td className="py-3 px-4">
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => openEditModal(inspection)}
-                            title="Update result / status"
-                          >
-                            <Pencil className="w-4 h-4" />
-                          </Button>
-                          {isAdmin && (
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadge(inspection.status)}`}>
+                          {inspection.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-text-primary">
+                        {inspection.result || "—"}
+                      </td>
+                      {isAdminOrInspector && (
+                        <td className="py-3 px-4">
+                          <div className="flex items-center space-x-2">
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleDelete(inspection.id)}
-                              title="Delete"
+                              onClick={() =>
+                                openEditModal({ ...inspection, id: editableId })
+                              }
+                              title="Update result / status"
                             >
-                              <Trash2 className="w-4 h-4 text-red-600" />
+                              <Pencil className="w-4 h-4" />
                             </Button>
-                          )}
-                        </div>
-                      </td>
-                    )}
-                  </tr>
-                ))
+                            {isAdmin && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDelete(editableId)}
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4 text-red-600" />
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

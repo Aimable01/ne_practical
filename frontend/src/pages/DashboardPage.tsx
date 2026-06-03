@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { reportService } from "../services/reportService";
-import type { DashboardStats } from "../types";
 import { Card, CardHeader } from "../components/ui/Card";
 import {
   FireExtinguisher,
@@ -166,8 +165,10 @@ export const DashboardPage: React.FC = () => {
         </h1>
         <p className="text-text-secondary mt-1">
           {user?.role === "ADMIN" && "System overview across all resources."}
-          {user?.role === "INSPECTOR" && "Your inspection and maintenance activity."}
-          {user?.role === "USER" && "Fire extinguisher status and your scheduled inspections."}
+          {user?.role === "INSPECTOR" &&
+            "Your inspection and maintenance activity."}
+          {user?.role === "USER" &&
+            "Fire extinguisher status and your scheduled inspections."}
         </p>
       </div>
 
@@ -203,7 +204,9 @@ export const DashboardPage: React.FC = () => {
               >
                 <FireExtinguisher className="w-5 h-5 text-brand-primary" />
                 <div>
-                  <p className="font-medium text-text-primary">Add Extinguisher</p>
+                  <p className="font-medium text-text-primary">
+                    Add Extinguisher
+                  </p>
                   <p className="text-sm text-text-secondary">
                     Register a new fire extinguisher
                   </p>
@@ -219,7 +222,9 @@ export const DashboardPage: React.FC = () => {
               >
                 <FireExtinguisher className="w-5 h-5 text-brand-primary" />
                 <div>
-                  <p className="font-medium text-text-primary">View Extinguishers</p>
+                  <p className="font-medium text-text-primary">
+                    View Extinguishers
+                  </p>
                   <p className="text-sm text-text-secondary">
                     Browse the extinguisher inventory
                   </p>
@@ -235,7 +240,9 @@ export const DashboardPage: React.FC = () => {
               >
                 <Calendar className="w-5 h-5 text-brand-primary" />
                 <div>
-                  <p className="font-medium text-text-primary">Schedule Inspection</p>
+                  <p className="font-medium text-text-primary">
+                    Schedule Inspection
+                  </p>
                   <p className="text-sm text-text-secondary">
                     Book an inspection appointment
                   </p>
@@ -251,7 +258,9 @@ export const DashboardPage: React.FC = () => {
               >
                 <Calendar className="w-5 h-5 text-brand-primary" />
                 <div>
-                  <p className="font-medium text-text-primary">My Inspections</p>
+                  <p className="font-medium text-text-primary">
+                    My Inspections
+                  </p>
                   <p className="text-sm text-text-secondary">
                     View and update your assigned inspections
                   </p>
@@ -267,7 +276,9 @@ export const DashboardPage: React.FC = () => {
               >
                 <Wrench className="w-5 h-5 text-brand-primary" />
                 <div>
-                  <p className="font-medium text-text-primary">Log Maintenance</p>
+                  <p className="font-medium text-text-primary">
+                    Log Maintenance
+                  </p>
                   <p className="text-sm text-text-secondary">
                     Record a maintenance activity
                   </p>
@@ -294,7 +305,9 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                   <div className="flex items-center space-x-3">
                     <FireExtinguisher className="w-5 h-5 text-blue-600" />
-                    <span className="text-text-primary">Active Extinguishers</span>
+                    <span className="text-text-primary">
+                      Active Extinguishers
+                    </span>
                   </div>
                   <span className="text-sm text-blue-600 font-medium">
                     {stats?.extinguishers?.active ?? 0}
@@ -304,7 +317,9 @@ export const DashboardPage: React.FC = () => {
                   <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
                     <div className="flex items-center space-x-3">
                       <AlertTriangle className="w-5 h-5 text-red-600" />
-                      <span className="text-text-primary">Expired – Action Required</span>
+                      <span className="text-text-primary">
+                        Expired – Action Required
+                      </span>
                     </div>
                     <span className="text-sm text-red-600 font-medium">
                       {stats?.extinguishers?.expired}
@@ -319,7 +334,9 @@ export const DashboardPage: React.FC = () => {
               <div className="flex items-center justify-between p-3 bg-indigo-50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <Calendar className="w-5 h-5 text-indigo-600" />
-                  <span className="text-text-primary">Inspections Completed</span>
+                  <span className="text-text-primary">
+                    Inspections Completed
+                  </span>
                 </div>
                 <span className="text-sm text-indigo-600 font-medium">
                   {stats?.inspections?.completed ?? 0}
