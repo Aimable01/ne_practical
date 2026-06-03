@@ -28,6 +28,10 @@ export const DashboardLayout: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
 
+  // Role-based navigation:
+  // ADMIN    → everything
+  // INSPECTOR → Dashboard, Inspections, Maintenance, Reports, Profile
+  // USER      → Dashboard, Extinguishers (view-only), Inspections, Reports, Profile
   const navItems: NavItem[] = [
     {
       label: "Dashboard",
@@ -38,12 +42,13 @@ export const DashboardLayout: React.FC = () => {
       label: "Extinguishers",
       path: "/extinguishers",
       icon: <FireExtinguisher className="w-5 h-5" />,
-      roles: ["ADMIN", "INSPECTOR"],
+      roles: ["ADMIN", "INSPECTOR", "USER"],
     },
     {
       label: "Inspections",
       path: "/inspections",
       icon: <Calendar className="w-5 h-5" />,
+      roles: ["ADMIN", "INSPECTOR", "USER"],
     },
     {
       label: "Maintenance",
@@ -55,10 +60,11 @@ export const DashboardLayout: React.FC = () => {
       label: "Reports",
       path: "/reports",
       icon: <BarChart3 className="w-5 h-5" />,
+      roles: ["ADMIN", "INSPECTOR"],
     },
   ];
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     setIsLogoutDialogOpen(true);
   };
 
@@ -71,6 +77,9 @@ export const DashboardLayout: React.FC = () => {
     if (!item.roles) return true;
     return hasRole(item.roles as any);
   });
+
+  const currentPageName =
+    location.pathname.split("/")[1] || "Dashboard";
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -101,7 +110,7 @@ export const DashboardLayout: React.FC = () => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
             {filteredNavItems.map((item) => (
               <Link
                 key={item.path}
@@ -122,22 +131,26 @@ export const DashboardLayout: React.FC = () => {
           {/* User info */}
           <div className="p-4 border-t border-gray-200">
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-brand-primary rounded-full flex items-center justify-center text-white font-semibold">
+              <div className="w-10 h-10 bg-brand-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">
                 {user?.firstName?.[0]}
                 {user?.lastName?.[0]}
               </div>
-              <div>
-                <p className="font-medium text-text-primary">
+              <div className="min-w-0">
+                <p className="font-medium text-text-primary truncate">
                   {user?.firstName} {user?.lastName}
                 </p>
-                <p className="text-sm text-text-secondary">{user?.role}</p>
+                <p className="text-xs text-text-secondary">{user?.role}</p>
               </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Link
                 to="/profile"
                 onClick={() => setIsSidebarOpen(false)}
-                className="flex items-center space-x-3 px-4 py-2 text-text-secondary hover:bg-gray-100 rounded-lg transition-colors"
+                className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${
+                  location.pathname === "/profile"
+                    ? "bg-brand-primary text-white"
+                    : "text-text-secondary hover:bg-gray-100"
+                }`}
               >
                 <User className="w-5 h-5" />
                 <span>Profile</span>
@@ -166,7 +179,7 @@ export const DashboardLayout: React.FC = () => {
               <Menu className="w-6 h-6" />
             </button>
             <h2 className="text-lg font-semibold text-text-primary capitalize">
-              {location.pathname.split("/")[1] || "Dashboard"}
+              {currentPageName}
             </h2>
             <div className="w-8" />
           </div>

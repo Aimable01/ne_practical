@@ -5,11 +5,15 @@ export const inspectionSchema = z.object({
   scheduledDate: z.string().min(1, 'Scheduled date is required'),
   scheduledTime: z.string().min(1, 'Scheduled time is required'),
   inspectorId: z.string().min(1, 'Inspector is required'),
-  status: z.enum(['SCHEDULED', 'COMPLETED', 'CANCELLED', 'FAILED'], {
-    message: 'Please select a valid status',
-  }),
+  status: z
+    .enum(['SCHEDULED', 'COMPLETED', 'CANCELLED', 'FAILED'])
+    .default('SCHEDULED'),
   result: z.string().optional(),
   notes: z.string().optional(),
 });
 
-export const updateInspectionSchema = inspectionSchema.partial();
+export const updateInspectionSchema = z.object({
+  status: z.enum(['SCHEDULED', 'COMPLETED', 'CANCELLED', 'FAILED']),
+  result: z.string().optional(),
+  notes: z.string().optional(),
+});

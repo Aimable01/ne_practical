@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import Inspection from '../models/Inspection';
 import Extinguisher from '../models/Extinguisher';
-import User from '../models/User';
+import User, { UserRole } from '../models/User';
 import { transporter } from '../config/mailer';
 import { logger } from '../utils/logger';
 import { AuthRequest } from '../middleware/auth';
@@ -17,7 +17,7 @@ export const createInspection = async (req: AuthRequest, res: Response): Promise
       return;
     }
 
-    // Verify inspector exists and has INSPECTOR role
+    // Verify inspector exists and has INSPECTOR or ADMIN role
     const inspector = await User.findById(inspectorId);
     if (!inspector) {
       res.status(404).json({ error: 'Inspector not found' });
@@ -39,19 +39,29 @@ export const createInspection = async (req: AuthRequest, res: Response): Promise
 
     await inspection.save();
 
-    // Send email notification to inspector
+    // Fetch all admins to notify them as well
+    const admins = await User.find({ role: UserRole.ADMIN }).select('email firstName lastName');
+
+    // Build recipient list: inspector + all admins (deduplicated)
+    const recipientEmails = new Set<string>([inspector.email]);
+    admins.forEach(a => recipientEmails.add(a.email));
+
+    const emailBody = `A new inspection has been scheduled.\n\nExtinguisher: ${extinguisher.serialNumber}\nLocation: ${extinguisher.location}\nType: ${extinguisher.type}\n\nAssigned Inspector: ${inspector.firstName} ${inspector.lastName} (${inspector.email})\nScheduled Date: ${new Date(scheduledDate).toDateString()}\nScheduled Time: ${scheduledTime}\n\nPlease ensure the inspection is completed on time.`;
+
+    // Send notification emails
     try {
-      await transporter.sendMail({
-        from: process.env.MAIL_USER,
-        to: inspector.email,
-        subject: 'New Inspection Scheduled',
-        text: `You have been assigned to inspect extinguisher ${extinguisher.serialNumber} at ${extinguisher.location}.\n\nScheduled Date: ${scheduledDate}\nScheduled Time: ${scheduledTime}\n\nPlease complete the inspection on time.`
-      });
+      for (const email of recipientEmails) {
+        await transporter.sendMail({
+          from: process.env.MAIL_USER,
+          to: email,
+          subject: `Inspection Scheduled – ${extinguisher.serialNumber}`,
+          text: emailBody
+        });
+        logger.info(`Inspection notification sent to ${email}`);
+      }
 
       inspection.notified = true;
       await inspection.save();
-
-      logger.info(`Inspection notification sent to ${inspector.email}`);
     } catch (emailError) {
       logger.warn('Failed to send inspection notification email', emailError);
     }

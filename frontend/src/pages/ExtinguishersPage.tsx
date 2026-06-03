@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 import { extinguisherService } from "../services/extinguisherService";
 import { extinguisherSchema } from "../validations/extinguisherSchemas";
 import type {
@@ -15,7 +16,6 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { Select } from "../components/ui/Select";
 import { Card, CardHeader } from "../components/ui/Card";
-import { ProtectedRoute } from "../components/ProtectedRoute";
 import { ConfirmDialog } from "../components/ui/ConfirmDialog";
 
 type ExtinguisherFormData = {
@@ -49,7 +49,20 @@ const statusOptions = [
   { value: "OUT_OF_SERVICE", label: "Out of Service" },
 ];
 
+const statusBadge = (status: ExtinguisherStatus) => {
+  const map: Record<ExtinguisherStatus, string> = {
+    ACTIVE: "bg-green-100 text-green-800",
+    EXPIRED: "bg-red-100 text-red-800",
+    MAINTENANCE_REQUIRED: "bg-yellow-100 text-yellow-800",
+    OUT_OF_SERVICE: "bg-gray-100 text-gray-800",
+  };
+  return map[status] ?? "bg-gray-100 text-gray-800";
+};
+
 export const ExtinguishersPage: React.FC = () => {
+  const { user, hasRole } = useAuth();
+  const isAdminOrInspector = hasRole(["ADMIN", "INSPECTOR"]);
+
   const [extinguishers, setExtinguishers] = useState<Extinguisher[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,6 +71,7 @@ export const ExtinguishersPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -75,12 +89,13 @@ export const ExtinguishersPage: React.FC = () => {
   }, [currentPage]);
 
   const fetchExtinguishers = async () => {
+    setIsLoading(true);
     try {
       const response = await extinguisherService.getAll(currentPage, 10);
       setExtinguishers(response.extinguishers || response.data || []);
-      setTotalPages(
-        response.pagination.pages || response.pagination.totalPages || 1,
-      );
+      const pagination = response.pagination;
+      setTotalPages(pagination.pages ?? pagination.totalPages ?? 1);
+      setTotalItems(pagination.total ?? 0);
     } catch (error) {
       toast.error("Failed to fetch extinguishers");
     } finally {
@@ -97,9 +112,7 @@ export const ExtinguishersPage: React.FC = () => {
         await extinguisherService.create(data);
         toast.success("Extinguisher created successfully");
       }
-      setIsModalOpen(false);
-      setEditingExtinguisher(null);
-      reset();
+      closeModal();
       fetchExtinguishers();
     } catch (error: any) {
       toast.error(error.response?.data?.error || "Operation failed");
@@ -108,34 +121,33 @@ export const ExtinguishersPage: React.FC = () => {
 
   const handleEdit = (extinguisher: Extinguisher) => {
     setEditingExtinguisher(extinguisher);
+    // Format dates to yyyy-MM-dd for <input type="date">
+    const fmt = (d: string) => d?.slice(0, 10) ?? "";
     reset({
       serialNumber: extinguisher.serialNumber,
       location: extinguisher.location,
       type: extinguisher.type,
       size: extinguisher.size,
-      installationDate: extinguisher.installationDate,
-      expiryDate: extinguisher.expiryDate,
+      installationDate: fmt(extinguisher.installationDate),
+      expiryDate: fmt(extinguisher.expiryDate),
       status: extinguisher.status,
     });
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     setDeleteId(id);
     setIsDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
     if (!deleteId) return;
-
     try {
       await extinguisherService.delete(deleteId);
       toast.success("Extinguisher deleted successfully");
       fetchExtinguishers();
     } catch (error: any) {
-      toast.error(
-        error.response?.data?.error || "Failed to delete extinguisher",
-      );
+      toast.error(error.response?.data?.error || "Failed to delete extinguisher");
     } finally {
       setIsDeleteDialogOpen(false);
       setDeleteId(null);
@@ -154,7 +166,7 @@ export const ExtinguishersPage: React.FC = () => {
     reset();
   };
 
-  const filteredExtinguishers = (extinguishers || []).filter(
+  const filteredExtinguishers = extinguishers.filter(
     (e) =>
       e.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.location.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -171,25 +183,32 @@ export const ExtinguishersPage: React.FC = () => {
   return (
     <div>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-text-primary">Extinguishers</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-text-primary">Extinguishers</h1>
+          {user?.role === "USER" && (
+            <p className="text-sm text-text-secondary mt-1">
+              Browse the extinguisher inventory and check status.
+            </p>
+          )}
+        </div>
         <div className="flex items-center space-x-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-placeholder w-4 h-4" />
             <Input
-              placeholder="Search extinguishers..."
+              placeholder="Search by serial / location…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 w-64"
             />
           </div>
-          <ProtectedRoute allowedRoles={["ADMIN", "INSPECTOR"]}>
+          {isAdminOrInspector && (
             <Button onClick={openModal}>
               <div className="flex gap-1 items-center">
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4" />
                 Add Extinguisher
               </div>
             </Button>
-          </ProtectedRoute>
+          )}
         </div>
       </div>
 
@@ -198,97 +217,75 @@ export const ExtinguishersPage: React.FC = () => {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                  Serial Number
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                  Location
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                  Type
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                  Size
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                  Status
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                  Expiry Date
-                </th>
-                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">
-                  Actions
-                </th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Serial Number</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Location</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Type</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Size</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Status</th>
+                <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Expiry Date</th>
+                {isAdminOrInspector && (
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-text-primary">Actions</th>
+                )}
               </tr>
             </thead>
             <tbody>
-              {filteredExtinguishers.map((extinguisher) => (
-                <tr
-                  key={extinguisher.id}
-                  className="border-b border-gray-100 hover:bg-gray-50"
-                >
-                  <td className="py-3 px-4 text-sm text-text-primary">
-                    {extinguisher.serialNumber}
-                  </td>
-                  <td className="py-3 px-4 text-sm text-text-primary">
-                    {extinguisher.location}
-                  </td>
-                  <td className="py-3 px-4 text-sm text-text-primary">
-                    {extinguisher.type}
-                  </td>
-                  <td className="py-3 px-4 text-sm text-text-primary">
-                    {extinguisher.size}
-                  </td>
-                  <td className="py-3 px-4">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        extinguisher.status === "ACTIVE"
-                          ? "bg-green-100 text-green-800"
-                          : extinguisher.status === "EXPIRED"
-                            ? "bg-red-100 text-red-800"
-                            : extinguisher.status === "MAINTENANCE_REQUIRED"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {extinguisher.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-sm text-text-primary">
-                    {extinguisher.expiryDate}
-                  </td>
-                  <td className="py-3 px-4">
-                    <div className="flex items-center space-x-2">
-                      <ProtectedRoute allowedRoles={["ADMIN", "INSPECTOR"]}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(extinguisher)}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                      </ProtectedRoute>
-                      <ProtectedRoute allowedRoles={["ADMIN"]}>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(extinguisher.id)}
-                        >
-                          <Trash2 className="w-4 h-4 text-red-600" />
-                        </Button>
-                      </ProtectedRoute>
-                    </div>
+              {filteredExtinguishers.length === 0 ? (
+                <tr>
+                  <td colSpan={isAdminOrInspector ? 7 : 6} className="text-center py-8 text-text-secondary">
+                    No extinguishers found.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredExtinguishers.map((extinguisher) => (
+                  <tr key={extinguisher.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4 text-sm font-mono text-text-primary">{extinguisher.serialNumber}</td>
+                    <td className="py-3 px-4 text-sm text-text-primary">{extinguisher.location}</td>
+                    <td className="py-3 px-4 text-sm text-text-primary">{extinguisher.type}</td>
+                    <td className="py-3 px-4 text-sm text-text-primary">{extinguisher.size}</td>
+                    <td className="py-3 px-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadge(extinguisher.status)}`}>
+                        {extinguisher.status.replace(/_/g, " ")}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-sm text-text-primary">
+                      {extinguisher.expiryDate?.slice(0, 10)}
+                    </td>
+                    {isAdminOrInspector && (
+                      <td className="py-3 px-4">
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(extinguisher)}
+                            title="Edit"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          {user?.role === "ADMIN" && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(extinguisher.id)}
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4 text-red-600" />
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
 
+        {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-4 px-4">
+          <div className="flex items-center justify-between mt-4 px-4 pb-2">
             <p className="text-sm text-text-secondary">
-              Page {currentPage} of {totalPages}
+              Page {currentPage} of {totalPages} &nbsp;·&nbsp; {totalItems} total
             </p>
             <div className="flex space-x-2">
               <Button
@@ -302,9 +299,7 @@ export const ExtinguishersPage: React.FC = () => {
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(totalPages, p + 1))
-                }
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
               >
                 Next
@@ -314,13 +309,12 @@ export const ExtinguishersPage: React.FC = () => {
         )}
       </Card>
 
-      {isModalOpen && (
+      {/* Create / Edit Modal */}
+      {isModalOpen && isAdminOrInspector && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <CardHeader
-              title={
-                editingExtinguisher ? "Edit Extinguisher" : "Add Extinguisher"
-              }
+              title={editingExtinguisher ? "Edit Extinguisher" : "Add Extinguisher"}
               subtitle={
                 editingExtinguisher
                   ? "Update extinguisher details"
@@ -330,13 +324,13 @@ export const ExtinguishersPage: React.FC = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <Input
                 label="Serial Number"
-                placeholder="Enter serial number"
+                placeholder="e.g. EXT-001"
                 error={errors.serialNumber?.message}
                 {...register("serialNumber")}
               />
               <Input
                 label="Location"
-                placeholder="Enter location"
+                placeholder="e.g. Building A – Floor 2"
                 error={errors.location?.message}
                 {...register("location")}
               />

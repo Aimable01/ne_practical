@@ -1,7 +1,8 @@
 import { Response } from 'express';
 import Maintenance from '../models/Maintenance';
 import Extinguisher from '../models/Extinguisher';
-import User from '../models/User';
+import User, { UserRole } from '../models/User';
+import { transporter } from '../config/mailer';
 import { logger } from '../utils/logger';
 import { AuthRequest } from '../middleware/auth';
 
@@ -37,6 +38,27 @@ export const createMaintenance = async (req: AuthRequest, res: Response): Promis
     });
 
     await maintenance.save();
+
+    // Notify inspector + all admins about the maintenance log
+    try {
+      const admins = await User.find({ role: UserRole.ADMIN }).select('email firstName lastName');
+      const recipientEmails = new Set<string>([inspector.email]);
+      admins.forEach(a => recipientEmails.add(a.email));
+
+      const emailBody = `A maintenance activity has been logged.\n\nExtinguisher: ${extinguisher.serialNumber}\nLocation: ${extinguisher.location}\nType: ${extinguisher.type}\n\nLogged by: ${inspector.firstName} ${inspector.lastName} (${inspector.email})\nDate of Action: ${new Date(dateOfAction).toDateString()}\n\nActions Taken:\n${actionsTaken}\n\nConditions Noted:\n${conditionsNoted}`;
+
+      for (const email of recipientEmails) {
+        await transporter.sendMail({
+          from: process.env.MAIL_USER,
+          to: email,
+          subject: `Maintenance Logged – ${extinguisher.serialNumber}`,
+          text: emailBody
+        });
+        logger.info(`Maintenance notification sent to ${email}`);
+      }
+    } catch (emailError) {
+      logger.warn('Failed to send maintenance notification email', emailError);
+    }
 
     logger.info(`Maintenance logged for extinguisher ${extinguisher.serialNumber}`);
 

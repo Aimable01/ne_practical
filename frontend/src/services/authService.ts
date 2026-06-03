@@ -50,4 +50,9 @@ export const authService = {
     const response = await api.post<{ message: string }>('/auth/reset-password', data);
     return response.data;
   },
+
+  getInspectors: async (): Promise<{ inspectors: User[] }> => {
+    const response = await api.get<{ inspectors: User[] }>('/auth/inspectors');
+    return response.data;
+  },
 };

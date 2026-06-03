@@ -11,7 +11,8 @@ import {
   forgotPassword,
   resetPassword,
 } from "../controllers/authController";
-import { authenticate } from "../middleware/auth";
+import { authenticate, authorize } from "../middleware/auth";
+import { UserRole } from "../models/User";
 import {
   registerValidation,
   loginValidation,
@@ -21,6 +22,9 @@ import {
   resetPasswordValidation,
 } from "../validators/authValidator";
 import { handleValidationErrors } from "../middleware/validationHandler";
+import User from "../models/User";
+import { Response } from "express";
+import { AuthRequest } from "../middleware/auth";
 
 const router = Router();
 
@@ -298,5 +302,31 @@ router.post(
   handleValidationErrors,
   resetPassword,
 );
+
+/**
+ * @swagger
+ * /api/auth/inspectors:
+ *   get:
+ *     summary: Get all inspectors (for scheduling dropdowns)
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Inspectors list retrieved successfully
+ *       401:
+ *         description: Authentication required
+ */
+router.get("/inspectors", authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const inspectors = await User.find({
+      role: { $in: [UserRole.INSPECTOR, UserRole.ADMIN] },
+      isEmailVerified: true,
+    }).select("_id firstName lastName email role");
+    res.json({ inspectors });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch inspectors" });
+  }
+});
 
 export default router;
