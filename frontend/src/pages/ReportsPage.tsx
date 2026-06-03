@@ -49,7 +49,7 @@ export const ReportsPage: React.FC = () => {
       setExtinguisherReports(extinguishers.extinguishers);
       setInspectionReports(inspections.inspections);
       setMaintenanceHistory(maintenance.maintenance);
-      setExpiredExtinguishers(expired.extinguishers);
+      setExpiredExtinguishers(expired?.extinguishers || []);
     } catch (error) {
       toast.error("Failed to fetch reports");
     } finally {
