@@ -77,8 +77,10 @@ export const ExtinguishersPage: React.FC = () => {
   const fetchExtinguishers = async () => {
     try {
       const response = await extinguisherService.getAll(currentPage, 10);
-      setExtinguishers(response.data);
-      setTotalPages(response.pagination.totalPages);
+      setExtinguishers(response.extinguishers || response.data || []);
+      setTotalPages(
+        response.pagination.pages || response.pagination.totalPages || 1,
+      );
     } catch (error) {
       toast.error("Failed to fetch extinguishers");
     } finally {

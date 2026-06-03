@@ -67,8 +67,10 @@ export const InspectionsPage: React.FC = () => {
       const response = hasRole(["INSPECTOR"])
         ? await inspectionService.getMyInspections(currentPage, 10)
         : await inspectionService.getAll(currentPage, 10);
-      setInspections(response.data);
-      setTotalPages(response.pagination.totalPages);
+      setInspections(response.inspections || response.data || []);
+      setTotalPages(
+        response.pagination.pages || response.pagination.totalPages || 1,
+      );
     } catch (error) {
       toast.error("Failed to fetch inspections");
     } finally {
@@ -79,7 +81,7 @@ export const InspectionsPage: React.FC = () => {
   const fetchExtinguishers = async () => {
     try {
       const response = await extinguisherService.getAll(1, 100);
-      setExtinguishers(response.data);
+      setExtinguishers(response.extinguishers || response.data || []);
     } catch (error) {
       console.error("Failed to fetch extinguishers:", error);
     }

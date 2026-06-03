@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Plus, Search, Wrench } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { maintenanceService } from "../services/maintenanceService";
 import { extinguisherService } from "../services/extinguisherService";
@@ -54,8 +54,10 @@ export const MaintenancePage: React.FC = () => {
       const response = hasRole(["INSPECTOR"])
         ? await maintenanceService.getMyMaintenance(currentPage, 10)
         : await maintenanceService.getAll(currentPage, 10);
-      setMaintenanceRecords(response.data);
-      setTotalPages(response.pagination.totalPages);
+      setMaintenanceRecords(response.maintenance || response.data || []);
+      setTotalPages(
+        response.pagination.pages || response.pagination.totalPages || 1,
+      );
     } catch (error) {
       toast.error("Failed to fetch maintenance records");
     } finally {
@@ -66,7 +68,7 @@ export const MaintenancePage: React.FC = () => {
   const fetchExtinguishers = async () => {
     try {
       const response = await extinguisherService.getAll(1, 100);
-      setExtinguishers(response.data);
+      setExtinguishers(response.extinguishers || response.data || []);
     } catch (error) {
       console.error("Failed to fetch extinguishers:", error);
     }
@@ -271,7 +273,6 @@ export const MaintenancePage: React.FC = () => {
                   Cancel
                 </Button>
                 <Button type="submit" isLoading={isSubmitting}>
-                  <Wrench className="w-4 h-4 mr-2" />
                   Log Maintenance
                 </Button>
               </div>

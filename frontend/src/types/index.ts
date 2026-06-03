@@ -1,4 +1,4 @@
-export type UserRole = 'ADMIN' | 'INSPECTOR' | 'USER';
+export type UserRole = "ADMIN" | "INSPECTOR" | "USER";
 
 export interface User {
   id: string;
@@ -30,9 +30,13 @@ export interface RegisterData {
   role?: UserRole;
 }
 
-export type ExtinguisherType = 'WATER' | 'CO2' | 'FOAM' | 'DRY_CHEMICAL';
-export type ExtinguisherSize = '2.5lbs' | '5lbs' | '9lbs' | '12lbs';
-export type ExtinguisherStatus = 'ACTIVE' | 'EXPIRED' | 'MAINTENANCE_REQUIRED' | 'OUT_OF_SERVICE';
+export type ExtinguisherType = "WATER" | "CO2" | "FOAM" | "DRY_CHEMICAL";
+export type ExtinguisherSize = "2.5lbs" | "5lbs" | "9lbs" | "12lbs";
+export type ExtinguisherStatus =
+  | "ACTIVE"
+  | "EXPIRED"
+  | "MAINTENANCE_REQUIRED"
+  | "OUT_OF_SERVICE";
 
 export interface Extinguisher {
   id: string;
@@ -47,7 +51,11 @@ export interface Extinguisher {
   updatedAt?: string;
 }
 
-export type InspectionStatus = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED' | 'FAILED';
+export type InspectionStatus =
+  | "SCHEDULED"
+  | "COMPLETED"
+  | "CANCELLED"
+  | "FAILED";
 
 export interface Inspection {
   id: string;
@@ -90,11 +98,15 @@ export interface DashboardStats {
 }
 
 export interface PaginatedResponse<T> {
-  data: T[];
+  extinguishers?: T[];
+  inspections?: T[];
+  maintenance?: T[];
+  data?: T[];
   pagination: {
     page: number;
     limit: number;
     total: number;
+    pages?: number;
     totalPages: number;
   };
 }
