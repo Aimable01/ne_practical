@@ -6,6 +6,7 @@ import {
   getMaintenanceHistory,
   getExpiredExtinguishers
 } from '../controllers/reportController';
+import { exportReport } from '../controllers/exportController';
 import { authenticate, authorize } from '../middleware/auth';
 import { UserRole } from '../models/User';
 
@@ -120,5 +121,41 @@ router.get('/maintenance', authenticate, getMaintenanceHistory);
  *         description: Authentication required
  */
 router.get('/expired', authenticate, getExpiredExtinguishers);
+
+/**
+ * @swagger
+ * /api/reports/export:
+ *   get:
+ *     summary: Export report as PDF or CSV
+ *     tags: [Reports]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: report
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [extinguishers, inspections, maintenance, expired]
+ *       - in: query
+ *         name: format
+ *         required: true
+ *         schema:
+ *           type: string
+ *           enum: [pdf, csv]
+ *       - in: query
+ *         name: period
+ *         schema:
+ *           type: string
+ *           enum: [daily, monthly, yearly]
+ *     responses:
+ *       200:
+ *         description: File download
+ *       400:
+ *         description: Invalid parameters
+ *       401:
+ *         description: Authentication required
+ */
+router.get('/export', authenticate, exportReport);
 
 export default router;

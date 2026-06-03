@@ -62,6 +62,7 @@ const statusBadge = (status: ExtinguisherStatus) => {
 export const ExtinguishersPage: React.FC = () => {
   const { user, hasRole } = useAuth();
   const isAdminOrInspector = hasRole(["ADMIN", "INSPECTOR"]);
+  const today = new Date().toISOString().slice(0, 10);
 
   const [extinguishers, setExtinguishers] = useState<Extinguisher[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -353,12 +354,14 @@ export const ExtinguishersPage: React.FC = () => {
               <Input
                 label="Installation Date"
                 type="date"
+                min={today}
                 error={errors.installationDate?.message}
                 {...register("installationDate")}
               />
               <Input
                 label="Expiry Date"
                 type="date"
+                min={today}
                 error={errors.expiryDate?.message}
                 {...register("expiryDate")}
               />

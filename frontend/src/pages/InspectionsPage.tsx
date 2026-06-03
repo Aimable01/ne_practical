@@ -50,6 +50,7 @@ export const InspectionsPage: React.FC = () => {
   const isAdmin = user?.role === "ADMIN";
   const isInspector = user?.role === "INSPECTOR";
   const isAdminOrInspector = isAdmin || isInspector;
+  const today = new Date().toISOString().slice(0, 10);
 
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [extinguishers, setExtinguishers] = useState<any[]>([]);
@@ -386,6 +387,7 @@ export const InspectionsPage: React.FC = () => {
               <Input
                 label="Scheduled Date"
                 type="date"
+                min={today}
                 error={createErrors.scheduledDate?.message}
                 {...regCreate("scheduledDate")}
               />

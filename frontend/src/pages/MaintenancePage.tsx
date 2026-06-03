@@ -26,6 +26,7 @@ type MaintenanceFormData = {
 export const MaintenancePage: React.FC = () => {
   const { user } = useAuth();
   const isInspector = user?.role === "INSPECTOR";
+  const today = new Date().toISOString().slice(0, 10);
 
   const [maintenanceRecords, setMaintenanceRecords] = useState<Maintenance[]>([]);
   const [extinguishers, setExtinguishers] = useState<any[]>([]);
@@ -263,6 +264,7 @@ export const MaintenancePage: React.FC = () => {
               <Input
                 label="Date of Action"
                 type="date"
+                min={today}
                 error={errors.dateOfAction?.message}
                 {...register("dateOfAction")}
               />
