@@ -1,0 +1,10 @@
+{
+  "name": "@fe-mis/services",
+  "version": "1.0.0",
+  "description": "Microservices for FE MIS",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build"
+  }
+}

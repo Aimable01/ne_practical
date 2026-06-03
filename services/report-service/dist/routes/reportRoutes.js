@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const reportController_1 = require("../controllers/reportController");
+const exportController_1 = require("../controllers/exportController");
+const shared_1 = require("@fe-mis/shared");
+const router = (0, express_1.Router)();
+router.get('/dashboard', shared_1.authenticate, reportController_1.getDashboardStats);
+router.get('/extinguishers', shared_1.authenticate, reportController_1.getExtinguisherReports);
+router.get('/inspections', shared_1.authenticate, reportController_1.getInspectionReports);
+router.get('/maintenance', shared_1.authenticate, reportController_1.getMaintenanceHistory);
+router.get('/expired', shared_1.authenticate, reportController_1.getExpiredExtinguishers);
+router.get('/export', shared_1.authenticate, (0, shared_1.authorize)(shared_1.UserRole.ADMIN, shared_1.UserRole.INSPECTOR), exportController_1.exportReport);
+exports.default = router;

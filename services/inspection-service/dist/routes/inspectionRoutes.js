@@ -1,0 +1,14 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const inspectionController_1 = require("../controllers/inspectionController");
+const shared_1 = require("@fe-mis/shared");
+const inspectionValidator_1 = require("../validators/inspectionValidator");
+const router = (0, express_1.Router)();
+router.get('/', shared_1.authenticate, inspectionController_1.getAllInspections);
+router.get('/my', shared_1.authenticate, inspectionController_1.getMyInspections);
+router.get('/:id', shared_1.authenticate, inspectionValidator_1.inspectionIdValidation, shared_1.handleValidationErrors, inspectionController_1.getInspectionById);
+router.post('/', shared_1.authenticate, (0, shared_1.authorize)(shared_1.UserRole.ADMIN, shared_1.UserRole.USER, shared_1.UserRole.INSPECTOR), inspectionValidator_1.createInspectionValidation, shared_1.handleValidationErrors, inspectionController_1.createInspection);
+router.put('/:id', shared_1.authenticate, (0, shared_1.authorize)(shared_1.UserRole.ADMIN, shared_1.UserRole.INSPECTOR), inspectionValidator_1.updateInspectionValidation, shared_1.handleValidationErrors, inspectionController_1.updateInspection);
+router.delete('/:id', shared_1.authenticate, (0, shared_1.authorize)(shared_1.UserRole.ADMIN), inspectionValidator_1.inspectionIdValidation, shared_1.handleValidationErrors, inspectionController_1.deleteInspection);
+exports.default = router;

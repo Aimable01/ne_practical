@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const maintenanceController_1 = require("../controllers/maintenanceController");
+const shared_1 = require("@fe-mis/shared");
+const maintenanceValidator_1 = require("../validators/maintenanceValidator");
+const router = (0, express_1.Router)();
+router.get('/', shared_1.authenticate, maintenanceController_1.getAllMaintenance);
+router.get('/my', shared_1.authenticate, maintenanceController_1.getMyMaintenanceLogs);
+router.get('/extinguisher/:extinguisherId', shared_1.authenticate, maintenanceController_1.getMaintenanceByExtinguisher);
+router.get('/:id', shared_1.authenticate, maintenanceController_1.getMaintenanceById);
+router.post('/', shared_1.authenticate, (0, shared_1.authorize)(shared_1.UserRole.ADMIN, shared_1.UserRole.INSPECTOR), maintenanceValidator_1.createMaintenanceValidation, shared_1.handleValidationErrors, maintenanceController_1.createMaintenance);
+exports.default = router;

@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const extinguisherController_1 = require("../controllers/extinguisherController");
+const shared_1 = require("@fe-mis/shared");
+const extinguisherValidator_1 = require("../validators/extinguisherValidator");
+const router = (0, express_1.Router)();
+router.get('/', shared_1.authenticate, extinguisherController_1.getAllExtinguishers);
+router.get('/:id', shared_1.authenticate, extinguisherValidator_1.extinguisherIdValidation, shared_1.handleValidationErrors, extinguisherController_1.getExtinguisherById);
+router.post('/', shared_1.authenticate, (0, shared_1.authorize)(shared_1.UserRole.ADMIN, shared_1.UserRole.INSPECTOR), extinguisherValidator_1.createExtinguisherValidation, shared_1.handleValidationErrors, extinguisherController_1.createExtinguisher);
+router.put('/:id', shared_1.authenticate, (0, shared_1.authorize)(shared_1.UserRole.ADMIN, shared_1.UserRole.INSPECTOR), extinguisherValidator_1.updateExtinguisherValidation, shared_1.handleValidationErrors, extinguisherController_1.updateExtinguisher);
+router.delete('/:id', shared_1.authenticate, (0, shared_1.authorize)(shared_1.UserRole.ADMIN), extinguisherValidator_1.extinguisherIdValidation, shared_1.handleValidationErrors, extinguisherController_1.deleteExtinguisher);
+exports.default = router;
