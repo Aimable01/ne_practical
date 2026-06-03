@@ -1,0 +1,30 @@
+{
+  "name": "@fe-mis/extinguisher-service",
+  "version": "1.0.0",
+  "description": "Extinguisher Service for FE MIS",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fe-mis/shared": "file:../shared",
+    "express": "^5.2.1",
+    "cors": "^2.8.6",
+    "helmet": "^8.2.0",
+    "dotenv": "^17.4.2",
+    "express-validator": "^7.3.2",
+    "axios": "^1.16.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.9.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}
